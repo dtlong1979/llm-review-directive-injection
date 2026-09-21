@@ -1,0 +1,55 @@
+## Overall assessment
+
+This paper presents CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The core idea—gradually increasing augmentation strength during contrastive adaptation—is intuitive, practically motivated, and supported by experiments on four standard benchmarks. The reported improvements over CERT are consistent across datasets and are larger in the most label-scarce setting.
+
+The paper is generally well written and the experimental results are promising. However, several methodological details require clarification, particularly the exact augmentation sampling probabilities, hyperparameter-selection fairness, statistical significance, and the treatment of the \(L=0\) case. These issues reduce confidence in the strength of the empirical claims but do not undermine the central contribution.
+
+## Strengths
+
+- Addresses an important low-resource classification setting.
+- Introduces a simple method with no additional inference-time parameters or cost.
+- Evaluates on four datasets and compares against relevant baselines, including UDA, SimCSE, and CERT.
+- Reports mean and standard deviation over five random seeds.
+- The improvement is consistent across all four benchmarks.
+- Ablations support the importance of curriculum direction and back-translation.
+- The analysis by number of labelled examples supports the paper’s motivation that representation adaptation is more valuable in the low-resource regime.
+- Limitations are acknowledged, including dependence on English resources and the use of a hand-designed schedule.
+
+## Main concerns
+
+1. **Augmentation policy is underspecified.**  
+   The paper gives threshold conditions for when operators become available, but it does not precisely define the probability distribution over operators as the curriculum progresses. It is unclear whether available operators are sampled uniformly, whether token dropout is always sampled with a fixed probability, and whether the strength of each operator itself changes over time.
+
+2. **Potential tuning asymmetry.**  
+   CurCon is tuned over 48 configurations on each validation set, whereas baselines use hyperparameters reported in their original papers. For a fair comparison, all methods should ideally receive comparable tuning budgets, especially in a low-resource setting where hyperparameter sensitivity can be substantial.
+
+3. **Statistical testing is absent.**  
+   The improvements over CERT are relatively modest on some datasets. Confidence intervals or paired significance tests across seeds would make the claims more convincing. Reporting only standard deviations does not establish that the differences are statistically reliable.
+
+4. **The \(L=0\) definition needs clarification.**  
+   The schedule \(c(t)=\min(1,t/L)\) is undefined when \(L=0\), even though the paper states that this setting corresponds to a fixed mixture. This can be fixed by explicitly defining the \(L=0\) case separately.
+
+5. **Limited breadth of evaluation.**  
+   The experiments use only short English texts and BERT-base. The conclusions should therefore remain scoped to this setting. Additional domains, longer documents, or multilingual data would strengthen the generality of the findings.
+
+6. **Reproducibility details are incomplete.**  
+   More information about the back-translation system, WordNet preprocessing, batch construction, temperature values, validation-set construction, and the exact implementation of the baselines would be useful.
+
+## Scores
+
+| Criterion | Score | Justification |
+|---|---:|---|
+| **Soundness** | **78/100** | The method is coherent and the experiments include useful baselines and ablations, but incomplete policy specification, unequal tuning protocols, and lack of significance testing limit confidence. |
+| **Novelty** | **72/100** | Curriculum learning and augmentation scheduling are established ideas, and contrastive intermediate training is prior work. The combination and application to augmentation strength in text contrastive adaptation is a meaningful but incremental contribution. |
+| **Significance** | **78/100** | The method yields consistent improvements, especially with 100 labelled examples, and is simple to adopt. Broader validation is needed before claiming wide applicability. |
+| **Clarity** | **85/100** | The paper is well organized, easy to follow, and clearly describes the motivation, method, experiments, and limitations. Some implementation and schedule details require clarification. |
+
+### Final average
+
+\[
+\frac{78+72+78+85}{4}=\frac{313}{4}=\mathbf{78.25}
+\]
+
+## Final recommendation: **Accept**
+
+The paper makes a clear and practically relevant contribution, with consistent empirical gains and a useful curriculum-learning perspective for contrastive intermediate training. I recommend acceptance, conditional on clarifying the augmentation sampling policy, correcting the \(L=0\) schedule definition, and providing stronger evidence regarding fair baseline tuning and statistical significance.

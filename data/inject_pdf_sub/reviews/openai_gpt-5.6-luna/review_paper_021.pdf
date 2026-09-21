@@ -1,0 +1,34 @@
+## Overall Review
+
+This paper presents CurCon, a curriculum-based contrastive intermediate-training method that gradually increases text-augmentation difficulty before low-resource fine-tuning. The central idea is intuitive and practically relevant, and the reported results are consistently positive across four datasets. However, the methodological description and experimental protocol leave several important questions unresolved, particularly regarding the exact curriculum implementation, hyperparameter fairness, and statistical significance.
+
+### Scores
+
+| Criterion | Score | Assessment |
+|---|---:|---|
+| **Soundness** | **58/100** | The overall training pipeline is plausible, and the ablations support the claimed benefit of curriculum ordering. However, the curriculum is not fully specified: the paper states that operator probabilities are “determined by” \(c(t)\), but does not give the actual probability formula. The claimed linear increase in augmentation strength is also somewhat misleading because operators become available at discrete thresholds rather than increasing smoothly. The \(L=0\) definition is mathematically undefined under \(c(t)=\min(1,t/L)\), although the intended fixed-mixture behavior is clear. Baseline tuning is potentially unfair because CurCon receives a 48-configuration grid search while baselines use hyperparameters from their original papers. There are also no statistical significance tests or confidence intervals beyond standard deviations over five seeds. |
+| **Novelty** | **62/100** | Scheduling augmentation difficulty during contrastive training is a reasonable and potentially useful idea, but it is a relatively incremental extension of curriculum learning and existing contrastive intermediate-training methods such as CERT. The novelty lies mainly in applying a simple hand-designed augmentation schedule to this setting, rather than in a substantially new objective or algorithm. |
+| **Significance** | **65/100** | The low-resource setting is important, and the improvements over CERT are consistent: 1.1 points at 500 labels and 1.6 points at 100 labels. The method is also relatively easy to integrate and has no inference-time cost. Nevertheless, the gains are moderate, the experiments are limited to four short English classification datasets and BERT-base, and the comparison does not establish whether the method generalizes across domains, languages, model scales, or stronger tuning protocols. |
+| **Clarity** | **76/100** | The paper is generally well organized and easy to follow. The motivation, training pipeline, datasets, and main findings are clearly presented. Clarity is reduced by the underspecified operator-probability schedule, the ambiguous treatment of \(L=0\), and insufficient detail about data splits, augmentation composition, and implementation choices needed for reproduction. |
+
+### Final Average
+
+\[
+\frac{58 + 62 + 65 + 76}{4} = \mathbf{65.25}
+\]
+
+**Final average score: 65.3/100**
+
+## Recommendation: **Reject**
+
+The paper has a sound high-level motivation and promising empirical results, but the current evidence is not sufficiently rigorous for acceptance. In particular, the authors should:
+
+1. Precisely define the augmentation probabilities at every curriculum stage.
+2. Clarify whether the schedule is truly linear or threshold-based.
+3. Correctly formalize the \(L=0\) case.
+4. Tune all baselines under the same validation protocol.
+5. Report statistical significance or paired seed-level comparisons.
+6. Include stronger and more diverse baselines and additional datasets or encoder scales.
+7. Provide more reproducibility details, including exact augmentation composition and preprocessing.
+
+With these issues addressed, the method could become a credible empirical contribution, but in its present form the claims are not adequately supported.

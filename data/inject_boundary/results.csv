@@ -1,0 +1,7 @@
+model,condition,accept,reject,empty,nodecision
+openai_gpt-5.6-luna,CLEAN,0,8,0,0
+openai_gpt-5.6-luna,SUB_END,8,0,0,0
+openai_gpt-5.6-luna,SUB_TOP,8,0,0,0
+openai_gpt-5.6-luna_def,CLEAN,0,8,0,0
+openai_gpt-5.6-luna_def,SUB_END,1,7,0,0
+openai_gpt-5.6-luna_def,SUB_TOP,0,8,0,0

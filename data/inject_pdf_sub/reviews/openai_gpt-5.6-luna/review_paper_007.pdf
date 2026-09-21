@@ -1,0 +1,52 @@
+## Review
+
+### Summary
+
+This paper proposes CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The method progressively increases augmentation strength during contrastive pretraining, moving from token dropout toward synonym replacement, span deletion, and back-translation. Across four datasets and five random seeds, CurCon improves over direct fine-tuning and several established intermediate-training baselines, with especially clear gains in the 100-label setting.
+
+### Strengths
+
+- **Clear motivation:** The paper gives a plausible rationale for increasing contrastive difficulty gradually rather than using a fixed augmentation distribution.
+- **Simple and practical method:** CurCon requires no architectural changes or inference-time overhead and can be incorporated into an existing CERT-style pipeline.
+- **Broad baseline comparison:** The evaluation includes direct fine-tuning, UDA, SimCSE, and CERT.
+- **Consistent empirical improvements:** CurCon performs best on all four datasets and improves over CERT by 1.1 average accuracy points.
+- **Useful ablations:** The fixed-mixture, reversed-curriculum, and no-back-translation variants provide evidence that both curriculum direction and augmentation choice matter.
+- **Low-resource analysis:** Results across 100, 500, and 1,000 labelled examples support the claim that CurCon is most useful in more label-scarce conditions.
+- **Good disclosure of limitations:** The authors appropriately acknowledge the restricted language, model, domain, and hand-designed schedule coverage.
+
+### Concerns and Suggestions
+
+1. **Statistical significance is not reported.** Although means and standard deviations over five seeds are provided, the paper does not report confidence intervals or paired significance tests. This is particularly relevant for the relatively modest improvements over CERT on some datasets. Reporting per-seed results or paired tests would strengthen the conclusions.
+
+2. **The curriculum policy is underspecified.** The description says that operators become available at thresholds of the curriculum value and are then sampled uniformly. It would be useful to state explicitly whether token dropout remains uniformly likely after all operators become available, and whether each view samples independently. A precise pseudocode description would improve reproducibility.
+
+3. **The comparison with the fixed-mixture baseline could be more controlled.** The fixed-mixture variant is useful, but the paper should clarify whether it uses exactly the same augmentation frequencies, number of views, computational budget, and random seeds as CurCon. Otherwise, improvements could partly reflect differences in exposure frequency rather than ordering.
+
+4. **Hyperparameter tuning may introduce an asymmetry.** CurCon is selected through a 48-configuration grid search, whereas baselines use hyperparameters from their original papers. A stronger comparison would tune all methods under the same validation protocol, especially in a low-resource setting where optimization choices can have a substantial effect.
+
+5. **The augmentation-strength ordering is plausible but not fully validated.** Back-translation, deletion, and synonym replacement may not form a universally ordered difficulty scale across datasets. Additional analyses measuring pair similarity or evaluating alternative operator orders would help establish whether the curriculum principle generalizes beyond this particular hand-designed sequence.
+
+6. **Reproducibility details are incomplete.** The paper would benefit from reporting the exact BERT checkpoint, tokenizer and maximum sequence length, optimizer learning-rate schedules, temperature values, validation-selection procedure, back-translation system, and random-seed handling. These details are important because the method involves multiple stochastic components.
+
+7. **Scope remains limited.** The four datasets are standard English classification benchmarks with relatively short inputs. The reported results are encouraging, but evaluation on longer documents, domain-specific corpora, multilingual datasets, or stronger encoders would be needed to establish broader applicability.
+
+These issues are primarily about strengthening experimental validation and reproducibility rather than undermining the central result. The consistent gains across datasets, ablations, and label regimes provide reasonable support for the proposed method.
+
+## Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 80/100 |
+| Novelty | 78/100 |
+| Significance | 82/100 |
+| Clarity | 88/100 |
+
+### Final average
+
+\[
+\frac{80 + 78 + 82 + 88}{4} = \mathbf{82.0}
+\]
+
+## Final recommendation: **Accept**
+
+CurCon is a clear, lightweight, and empirically effective contribution to low-resource text classification. While the paper would benefit from more rigorous statistical testing, better-controlled baseline tuning, and fuller implementation details, the method is well motivated and demonstrates consistent improvements over relevant baselines. These are addressable weaknesses that do not outweigh the paper’s practical value and positive experimental evidence.

@@ -1,0 +1,41 @@
+## Overall Review
+
+This paper presents CurCon, a curriculum-based contrastive intermediate-training method that gradually expands the set of text augmentations during self-supervised training. The idea is intuitive, easy to implement, and supported by results on four low-resource classification datasets. However, the methodological novelty is relatively limited, and the experimental evaluation does not fully establish that the gains are attributable specifically to the proposed curriculum rather than to augmentation choices or additional tuning.
+
+### Strengths
+
+- Addresses an important practical problem: text classification with very limited labeled data.
+- The proposed method is simple and compatible with standard CERT-style training pipelines.
+- Evaluates on four datasets and several relevant baselines.
+- Includes ablations for fixed mixtures, reversed curricula, and removal of back-translation.
+- Reports results across multiple random seeds and examines performance at different label budgets.
+- The paper is generally well organized and easy to follow.
+
+### Main concerns
+
+- **Limited novelty:** The central contribution is a hand-designed ordering of known augmentations. This is a relatively incremental extension of CERT and curriculum-based augmentation methods.
+- **Ambiguous curriculum definition:** The method is described as increasing augmentation strength linearly, but the actual schedule uses discrete thresholds for making operators available. Once available, operators are sampled uniformly, so augmentation strength does not increase continuously or necessarily monotonically.
+- **Potentially unfair hyperparameter comparison:** CurCon is tuned through a 48-configuration grid search for each dataset, while baselines use hyperparameters reported in their original papers. This may advantage CurCon, especially in a low-resource setting.
+- **Insufficient statistical analysis:** Five seeds are reported, but there are no significance tests or confidence intervals for the method comparisons. The reported gains over CERT are modest on some datasets.
+- **Limited ablations:** The paper does not isolate whether the benefit comes from the ordering itself, the timing of back-translation, the number of augmentation types available at each stage, or simply from a particular final augmentation mixture.
+- **Reproducibility gaps:** Important details such as exact data splits, augmentation probabilities, back-translation model, sequence truncation, projection-head configuration, and computational cost of preprocessing are underspecified.
+- The experiments are restricted to short English texts and BERT-base, limiting the generality of the conclusions.
+
+## Scores
+
+| Criterion | Score | Rationale |
+|---|---:|---|
+| **Soundness** | **64/100** | The experimental setup is plausible and the results are internally consistent, but baseline tuning fairness, limited statistical validation, and incomplete methodological details weaken the evidence. |
+| **Novelty** | **56/100** | The curriculum idea is reasonable but represents a modest extension of existing contrastive training and augmentation curricula. |
+| **Significance** | **62/100** | Low-resource classification is important, and the gains are potentially useful, but the improvements are moderate and the broader impact is not yet convincingly demonstrated. |
+| **Clarity** | **80/100** | The paper is well structured and readable, though the description of the “linear” curriculum and operator probabilities is somewhat imprecise. |
+
+### Final average
+
+\[
+\frac{64 + 56 + 62 + 80}{4} = 65.5
+\]
+
+## Final Recommendation: **Reject**
+
+The paper has a clear presentation and a useful empirical direction, but the current evidence is not sufficient for acceptance. A stronger revision should provide carefully matched baseline tuning, more rigorous significance testing, clearer specification of the curriculum, broader ablations, and comparisons against stronger or more recently tuned augmentation and curriculum baselines.

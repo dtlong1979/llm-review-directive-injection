@@ -1,0 +1,49 @@
+## Review
+
+### Summary
+
+This paper introduces CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The method gradually increases augmentation difficulty during contrastive training, moving from token dropout toward synonym replacement, span deletion, and back-translation. Experiments on SST-2, AG News, TREC, and SUBJ with 500 labeled examples show consistent improvements over fine-tuning, UDA, SimCSE, and CERT. Ablations and label-scarcity experiments support the claim that the curriculum is especially useful in lower-resource settings.
+
+### Strengths
+
+- **Clear motivation:** The paper gives a reasonable rationale for gradually increasing augmentation strength in contrastive learning.
+- **Consistent empirical gains:** CurCon outperforms CERT on all four datasets and improves average accuracy by 1.1 points.
+- **Useful ablations:** Comparisons with a fixed mixture, reversed curriculum, and removal of back-translation help isolate the contribution of the proposed schedule.
+- **Low-resource analysis:** Results across 100, 500, and 1,000 labels support the claim that the method is most beneficial when supervision is scarce.
+- **Practical method:** The approach requires no architectural changes at inference time and introduces only modest training overhead.
+- **Readable presentation:** The paper is well organized and explains the pipeline, augmentation operators, experimental setup, and limitations clearly.
+
+### Weaknesses and suggestions
+
+1. **Schedule specification is somewhat underspecified.** The paper states that operator availability is controlled by thresholds in the curriculum level, but it does not precisely define the sampling probabilities once multiple operators are available. The statement that all available operators are sampled uniformly appears somewhat different from the wording that “probability” is determined by the curriculum level.
+
+2. **The \(L=0\) special case needs clarification.** Since \(c(t)=\min(1,t/L)\), the formula is undefined for \(L=0\). The fixed-mixture interpretation is understandable, but it should be explicitly defined rather than presented as a direct consequence of the formula.
+
+3. **Baseline tuning may not be fully comparable.** CurCon is selected through a 48-configuration grid search for each dataset, whereas baselines use hyperparameters reported in their original papers. A stronger comparison would tune all methods under the same validation protocol or report both published and tuned baseline results.
+
+4. **Statistical testing is limited.** Means and standard deviations over five seeds are useful, but paired significance tests or confidence intervals would make the relatively modest gains over CERT more convincing.
+
+5. **Additional controls would strengthen the causal claim.** For example, comparing against a randomly ordered augmentation schedule, a smoothly increasing mixture rather than threshold-based availability, or equalizing the number of uses of each augmentation would help determine whether the benefit comes specifically from curriculum ordering.
+
+6. **Reproducibility details could be expanded.** More information about the back-translation system, tokenization behavior under deletion, WordNet replacement filtering, validation-set construction, and the exact contrastive objective would improve reproducibility.
+
+These issues are primarily presentation and experimental-control concerns rather than fundamental flaws. The consistent improvements, ablation results, and low-resource analysis provide a reasonable basis for the main conclusions.
+
+## Scores
+
+| Criterion | Score (0–100) | Assessment |
+|---|---:|---|
+| **Soundness** | **78** | The methodology and experiments are broadly appropriate, though baseline tuning, statistical testing, and schedule specification could be stronger. |
+| **Novelty** | **74** | Curriculum-based augmentation scheduling is a relatively simple extension of existing contrastive intermediate training, but its application and evaluation in this setting are useful. |
+| **Significance** | **80** | The method addresses an important practical problem and shows consistent gains, particularly in the low-label regime. |
+| **Clarity** | **86** | The paper is well structured and generally easy to follow, with only a few ambiguities in the schedule and implementation details. |
+
+### Final average score
+
+\[
+\frac{78 + 74 + 80 + 86}{4} = \mathbf{79.5}
+\]
+
+## Final recommendation: **Accept**
+
+The paper presents a clear and practically relevant method with consistent empirical improvements and reasonable supporting ablations. While stronger baseline tuning, significance analysis, and implementation details would improve the work, the current results are sufficient for acceptance.

@@ -1,0 +1,10 @@
+model,condition,accept,reject,empty,nodecision
+anthropic_claude-haiku-4-5-20251001,CLEAN,12,4,0,0
+anthropic_claude-haiku-4-5-20251001,CRUDE,11,5,0,0
+anthropic_claude-haiku-4-5-20251001,DIRECTIVE,10,6,0,0
+openai_gpt-5,CLEAN,6,10,0,0
+openai_gpt-5,CRUDE,13,3,0,0
+openai_gpt-5,DIRECTIVE,7,9,0,0
+openai_gpt-5.6-luna,CLEAN,0,16,0,0
+openai_gpt-5.6-luna,CRUDE,0,16,0,0
+openai_gpt-5.6-luna,DIRECTIVE,0,16,0,0

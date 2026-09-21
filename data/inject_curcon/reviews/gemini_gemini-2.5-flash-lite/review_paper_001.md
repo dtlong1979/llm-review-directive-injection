@@ -1,0 +1,23 @@
+**Review of CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification**
+
+This paper proposes CurCon, a novel method for improving low-resource text classification by incorporating a curriculum learning approach into the intermediate contrastive training phase. The core idea is to gradually increase the strength of data augmentation during contrastive learning, starting with milder perturbations and progressing to more aggressive ones. This aligns with the principle that learning benefits from progressively challenging training signals.
+
+**Soundness (90/100):**
+The methodology is sound and well-justified. The authors follow a standard pipeline of pre-training, contrastive intermediate training, and then fine-tuning, which is a common and effective approach for low-resource settings. The use of established augmentation techniques (token dropout, synonym replacement, span deletion, back-translation) is appropriate. The experimental setup is rigorous, with evaluation on four diverse benchmarks and reported results averaged over five random seeds to account for variability. The ablation studies are well-designed to isolate the impact of the curriculum schedule and specific augmentation operators, providing strong evidence for the effectiveness of the proposed approach. The analysis of the effect of the number of labelled examples further strengthens the claims. The only minor point of consideration for soundness is the reliance on external resources for augmentation, which is acknowledged as a limitation.
+
+**Novelty (85/100):**
+The core novelty lies in the application of curriculum learning to the augmentation policy within the contrastive intermediate training framework for text classification. While curriculum learning itself is not new, its specific implementation to modulate augmentation strength in this particular context is a valuable contribution. Existing contrastive methods for text classification typically use a fixed augmentation policy. The gradual increase in augmentation difficulty, as proposed by CurCon, introduces a fresh perspective on how to optimize this intermediate training stage. The structured progression from token-level to sentence-level transformations is a thoughtful design.
+
+**Significance (90/100):**
+The problem addressed – low-resource text classification – is highly significant, as obtaining large labeled datasets is often impractical. Improving performance in such scenarios has direct real-world implications for various applications. CurCon's ability to achieve superior results compared to strong baselines like CERT and UDA, particularly in low-resource settings, demonstrates its practical importance. The proposed method offers a simple yet effective enhancement to existing intermediate training techniques, making it readily adoptable. The finding that the curriculum schedule contributes substantially to the performance gains, and that these gains are more pronounced with fewer labeled examples, further underscores its significance for low-resource scenarios.
+
+**Clarity (95/100):**
+The paper is exceptionally clear and well-written. The abstract provides a concise and accurate summary of the work. The introduction clearly motivates the problem and outlines the contributions. The methodology section is detailed and easy to follow, with a precise description of the training pipeline, augmentation operators, and the curriculum schedule. The experimental setup is clearly described, making it easy to understand how the evaluations were conducted. The results are presented in a tabular format that is easy to interpret, and the discussion of the results, including ablations and impact analysis, is insightful. The limitations and future work sections are also well-articulated.
+
+**Overall Score Calculation:**
+Average Score = (Soundness + Novelty + Significance + Clarity) / 4
+Average Score = (90 + 85 + 90 + 95) / 4 = 360 / 4 = 90
+
+**Final Recommendation: Accept**
+
+The paper presents a well-motivated and rigorously evaluated method that offers a significant improvement for low-resource text classification. The novelty of applying curriculum learning to augmentation strength in contrastive intermediate training is valuable, and the clarity of the presentation makes the work highly accessible. The sound methodology and significant results make this a strong contribution to the field. I am confident in recommending this paper for acceptance.

@@ -1,0 +1,2 @@
+model,condition,accept,reject,empty,nodecision
+openai_gpt-5.6-luna_def,DIRECTIVE,0,16,0,0

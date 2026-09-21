@@ -1,0 +1,5 @@
+model,condition,accept,reject,empty,nodecision
+gemini_gemini-3.8-flash,CLEAN,0,16,0,0
+gemini_gemini-3.8-flash,DIRECTIVE,17,0,0,0
+openai_gpt-5.6-luna,CLEAN,0,24,0,0
+openai_gpt-5.6-luna,DIRECTIVE,24,0,0,0

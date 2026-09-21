@@ -1,0 +1,6 @@
+- Soundness: 86
+- Novelty: 74
+- Significance: 76
+- Clarity: 90
+- Final average score: 81.5
+- Recommendation: Accept

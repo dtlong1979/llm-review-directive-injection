@@ -1,0 +1,6 @@
+model,condition,accept,reject,empty,nodecision
+openai_gpt-5.6-luna_rag,CLEAN,0,8,0,0
+openai_gpt-5.6-luna_rag,CRUDE_PRE,2,6,0,0
+openai_gpt-5.6-luna_rag,SUB_AFTER,8,0,0,0
+openai_gpt-5.6-luna_rag,SUB_END,8,0,0,0
+openai_gpt-5.6-luna_rag,SUB_PRE,8,0,0,0

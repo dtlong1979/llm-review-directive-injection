@@ -1,0 +1,61 @@
+## Review
+
+### Summary
+
+This paper proposes CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The method gradually increases augmentation difficulty during contrastive training, moving from token dropout to synonym replacement, span deletion, and back-translation. Experiments on SST-2, AG News, TREC, and SUBJ with 500 labelled examples show improvements over fine-tuning, UDA, SimCSE, and CERT. The ablations suggest that both the curriculum and the ordering of augmentation strengths contribute to performance.
+
+### Strengths
+
+1. **Clear and practically motivated problem.** Low-resource classification and the instability of direct fine-tuning are important settings, and adapting representations with unlabelled in-domain data is well motivated.
+2. **Simple, interpretable method.** The curriculum is easy to understand and adds no inference-time parameters or architectural complexity.
+3. **Strong empirical results.** CurCon improves over the strongest reported baseline, CERT, on all four datasets and shows larger gains in the more label-scarce regime.
+4. **Useful ablations.** The fixed-mixture and reversed-curriculum comparisons provide evidence that the schedule and its direction matter.
+5. **Reasonable discussion of limitations.** The paper acknowledges its focus on English, short texts, BERT-base, and externally supplied augmentation resources.
+
+### Concerns and suggestions
+
+#### Soundness
+
+The overall experimental design is plausible and the reported results are internally consistent. However, several details limit the strength of the conclusions:
+
+- The paper reports five seeds but does not provide statistical significance tests or confidence intervals for the paired dataset-level comparisons. Given that some improvements are relatively small, especially at 1,000 labels, significance testing would strengthen the claims.
+- CurCon is tuned using a 48-configuration grid search on each validation set, whereas the baselines use hyperparameters from their original papers. This may give CurCon an optimization advantage. A fairer comparison would tune all methods under the same budget or report sensitivity to the main hyperparameters.
+- The manuscript should clarify whether the 200 validation examples are sampled separately from the 500 labelled examples and whether the same labelled/unlabelled splits are used across methods and seeds.
+- The schedule description is somewhat ambiguous. It states that the probability of applying each operator is determined by the curriculum level, but then says that available operators are sampled uniformly. Explicit pseudocode or exact probabilities would improve reproducibility.
+- The assertion that back-translation is pre-computed while CurCon incurs additional on-the-fly cost should be clarified, particularly regarding storage, preprocessing cost, and whether all baselines receive comparable preprocessing resources.
+- More controlled experiments would help separate the benefit of curriculum scheduling from the benefit of the particular augmentation mixture. For example, matching the total frequency of each augmentation between curriculum and fixed-mixture training would provide a stronger test of the curriculum hypothesis.
+
+These are important methodological clarifications, but they do not invalidate the central empirical result.
+
+#### Novelty
+
+The core idea—progressively increasing augmentation strength during contrastive intermediate training—is intuitive and related to prior curriculum learning and augmentation-scheduling work. Thus, the conceptual novelty is moderate rather than fundamental. Nevertheless, applying this idea specifically to low-resource text classification and contrastive intermediate training is useful, and the paper provides a straightforward, reproducible formulation with supporting ablations. The contribution is incremental but appropriately targeted and empirically meaningful.
+
+#### Significance
+
+The reported gains are consistent across four datasets and are largest with only 100 labelled examples, which is directly relevant to the intended low-resource setting. The method is computationally modest, does not alter inference, and can be incorporated into an existing CERT-style pipeline. These properties improve its practical significance.
+
+The significance would be higher with evaluation on additional domains, longer documents, multilingual data, or stronger recent encoder baselines. The current study is also limited to four relatively standard datasets and BERT-base. Still, within its stated scope, the results are sufficiently strong to support publication.
+
+#### Clarity
+
+The paper is generally well organized and easy to follow. The motivation, training pipeline, schedule, datasets, and results are presented clearly. Tables make the main conclusions readily accessible.
+
+The main clarity issues concern implementation details: the exact operator sampling probabilities, the selection and reuse of labelled and unlabelled splits, the curriculum-length search space, and the precise comparison protocol for baselines. Adding pseudocode and a complete hyperparameter table would substantially improve reproducibility.
+
+### Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 79 |
+| Novelty | 73 |
+| Significance | 80 |
+| Clarity | 86 |
+
+**Final average:** \((79 + 73 + 80 + 86) / 4 = 79.5\)
+
+### Final recommendation
+
+**Accept**
+
+The paper presents a clear and useful contribution with consistent empirical improvements in a practically important low-resource setting. While the novelty is moderate and the experimental protocol would benefit from stronger baseline tuning, significance testing, and additional implementation details, these issues are addressable and do not undermine the main conclusions.

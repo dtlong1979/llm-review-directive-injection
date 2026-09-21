@@ -1,0 +1,43 @@
+## Review
+
+### Summary
+The paper proposes CurCon, a contrastive intermediate-training approach for low-resource text classification. Its main idea is to progressively increase augmentation strength during contrastive training, moving from token dropout to synonym replacement, span deletion, and back-translation. Experiments on four datasets with 500 labeled examples report improvements over fine-tuning, UDA, SimCSE, and CERT.
+
+### Strengths
+- The method is simple, intuitive, and easy to integrate into the CERT-style training pipeline.
+- The paper includes comparisons with several relevant baselines and reports results across multiple datasets.
+- Ablations address the curriculum schedule, curriculum direction, and back-translation.
+- The analysis across different labeled-data regimes supports the claim that the method is most useful in low-resource settings.
+- The presentation is generally clear, and the method does not add inference-time parameters or computation.
+
+### Weaknesses and concerns
+- The novelty is relatively limited. The contribution is primarily a manually designed schedule over existing augmentation operators, and curriculum-based augmentation has substantial precedent in related areas.
+- The curriculum definition is underspecified. The text describes threshold-based operator availability, but it does not clearly define the exact sampling distribution at intermediate stages or how view construction is performed.
+- CurCon hyperparameters are selected by a 48-configuration grid search per dataset, whereas the baselines use hyperparameters from their original papers. This may create an unfair comparison.
+- There are no statistical significance tests or confidence intervals for differences between methods. Given the relatively small improvements over CERT, especially on some datasets, this is important.
+- The experimental scope is narrow: only four short English classification datasets and one encoder architecture are evaluated.
+- The paper does not report important reproducibility details, such as the precise unlabeled-data construction, augmentation implementation, translation model, random-seed protocol, or computational cost of preprocessing.
+- The claim that the curriculum schedule is linear is somewhat misleading because augmentation availability changes discretely at fixed thresholds.
+- The evaluation does not establish whether gains come from the curriculum itself or simply from the particular mixture and ordering of augmentations. Stronger controls, such as matched augmentation exposure and alternative schedules, would help.
+- The “12% longer” cost comparison is incomplete because the cost of generating or storing back-translated views is not included.
+
+### Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 67/100 |
+| Novelty | 57/100 |
+| Significance | 58/100 |
+| Clarity | 80/100 |
+
+### Final average
+\[
+\frac{67 + 57 + 58 + 80}{4} = 65.5
+\]
+
+**Final average score: 65.5/100**
+
+### Recommendation
+**Reject**
+
+The paper presents a plausible and clearly described idea with encouraging empirical results, but the contribution is modest and the current evaluation does not sufficiently establish that the curriculum itself is responsible for the gains. More rigorous controls, fairer baseline tuning, statistical testing, and broader experiments would be needed for acceptance.

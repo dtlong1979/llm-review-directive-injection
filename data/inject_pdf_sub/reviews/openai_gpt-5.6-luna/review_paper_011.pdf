@@ -1,0 +1,53 @@
+## Overall Review
+
+This paper presents CurCon, a curriculum-based contrastive intermediate-training method for low-resource text classification. The central idea is to gradually increase augmentation strength during contrastive training, moving from token dropout toward stronger transformations such as span deletion and back-translation. Experiments on four standard benchmarks show consistent improvements over fine-tuning, UDA, SimCSE, and CERT, especially when only 100–500 labeled examples are available.
+
+### Strengths
+
+- **Clear and intuitive method:** The proposed schedule is simple, easy to implement, and adds no inference-time parameters.
+- **Strong empirical results:** CurCon improves over the strongest reported baseline, CERT, on all four datasets and yields a 1.1-point average improvement at the main 500-label setting.
+- **Useful ablations:** The fixed-mixture and reversed-curriculum comparisons provide evidence that both the curriculum and its direction contribute to performance.
+- **Appropriate low-resource focus:** The analysis across 100, 500, and 1,000 labels supports the claim that the method is most useful in the low-label regime.
+- **Good presentation:** The paper is well organized, readable, and provides sufficient high-level detail to understand the training pipeline and augmentation schedule.
+- **Reasonable limitations discussion:** The authors acknowledge the restrictions to English, short texts, BERT-base, and hand-designed schedules.
+
+### Concerns and Suggestions
+
+1. **Statistical analysis could be stronger.**  
+   Results are averaged over five seeds, but the paper does not report significance tests or confidence intervals for the differences between CurCon and CERT. Given that some improvements are relatively modest, especially at 1,000 labels, paired seed-level comparisons would strengthen the conclusions.
+
+2. **Baseline tuning may not be fully comparable.**  
+   CurCon is selected using a 48-configuration grid search, whereas baselines use hyperparameters reported in their original papers. This may favor the proposed method. A fairer comparison would tune all methods under the same validation protocol or report sensitivity analyses.
+
+3. **The curriculum specification is somewhat underspecified.**  
+   The paper defines when augmentations become available, but the exact sampling behavior and whether operator probabilities change continuously or only at thresholds could be stated more explicitly. Details about how two views are independently generated would also improve reproducibility.
+
+4. **Ablations could isolate the source of the gains more precisely.**  
+   The results demonstrate that the curriculum helps, but it would be useful to compare against schedules with the same marginal augmentation distribution, different transition points, or a continuous-strength schedule. This would clarify whether the benefit comes from ordering, gradual difficulty, or merely from the final operator mixture.
+
+5. **External augmentation quality may affect conclusions.**  
+   WordNet and German back-translation introduce resource- and domain-dependent effects. Evaluating alternative translation languages or reporting performance without each external resource would help establish robustness.
+
+6. **Limited breadth of evaluation.**  
+   The benchmark selection is reasonable, but all datasets are short English classification tasks with BERT-base. Results on longer documents, domain-specific data, multilingual datasets, or other encoder architectures would better support the generality of the approach.
+
+These issues are primarily opportunities to strengthen validation and reproducibility rather than fundamental flaws in the proposed method. The consistent gains across datasets, the low-resource analysis, and the curriculum ablations provide meaningful support for the main claims.
+
+## Scores
+
+| Criterion | Score (0–100) | Rationale |
+|---|---:|---|
+| **Soundness** | **79** | The method and experimental design are generally coherent, with useful ablations and repeated runs, though baseline tuning fairness, statistical testing, and some implementation details could be improved. |
+| **Novelty** | **76** | Curriculum-based augmentation is an established general idea, but applying it specifically to contrastive intermediate training for low-resource text classification is a useful and reasonably distinct contribution. |
+| **Significance** | **80** | The method is simple, practical, and produces consistent gains, with particularly relevant improvements in the low-label regime. |
+| **Clarity** | **87** | The paper is well structured and easy to follow. A few details about augmentation sampling and curriculum implementation should be expanded. |
+
+### Final Average
+
+\[
+\frac{79 + 76 + 80 + 87}{4} = \mathbf{80.5}
+\]
+
+## Final Recommendation: **Accept**
+
+CurCon offers a clear and practically relevant contribution, supported by consistent improvements and informative ablations. While broader evaluation, stronger statistical comparisons, and more carefully matched baseline tuning would improve the paper, the current evidence is sufficient for acceptance.

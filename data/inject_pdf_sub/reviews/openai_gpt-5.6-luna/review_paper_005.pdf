@@ -1,0 +1,38 @@
+## Review
+
+### Summary
+The paper proposes CurCon, a contrastive intermediate-training method that gradually increases text augmentation strength during training. It evaluates the approach on four low-resource classification datasets and reports consistent improvements over fine-tuning, UDA, SimCSE, and CERT.
+
+### Strengths
+- The method is simple, intuitive, and easy to integrate into existing contrastive-training pipelines.
+- The curriculum idea is well motivated and operationalized with a clear schedule.
+- Experiments cover four datasets and include ablations for fixed, reversed, and reduced augmentation curricula.
+- Results are consistently positive, especially in the 100-label setting.
+- The paper is generally well organized and clearly written.
+
+### Concerns
+- **Limited novelty:** The main contribution is a hand-designed curriculum over augmentation strength. This is a relatively incremental extension of CERT and existing curriculum/augmentation-scheduling ideas.
+- **Potentially unfair baseline comparison:** CurCon hyperparameters are selected through a 48-configuration grid search for each dataset, while baselines use hyperparameters reported in their original papers. This may substantially favor CurCon.
+- **Insufficient experimental detail:** The paper does not report the exact training procedures, augmentation implementation details, validation protocol, or whether all methods received comparable tuning budgets.
+- **Weak statistical evidence:** Although standard deviations over five seeds are reported, there are no significance tests or per-seed results. Several improvements are small relative to variability.
+- **Narrow evaluation:** The study only uses four short English classification datasets and a single BERT-base encoder. It is unclear whether the method generalizes to other domains, longer documents, languages, or model families.
+- **Ablation limitations:** The ablations establish that the proposed schedule helps, but do not isolate whether the gain comes from the ordering itself, the changing augmentation distribution, or additional exposure to particular operators.
+- **Possible data/protocol ambiguity:** The relationship among the 500 labeled examples, the validation examples, and the remaining unlabeled training data should be specified more carefully to rule out unintended overlap or inconsistent label budgets.
+
+## Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 66/100 |
+| Novelty | 57/100 |
+| Significance | 61/100 |
+| Clarity | 84/100 |
+
+### Final average
+\[
+\frac{66 + 57 + 61 + 84}{4} = 67.0
+\]
+
+## Final recommendation: **Reject**
+
+The paper presents a clear and plausible method with encouraging results, but the contribution is incremental and the experimental comparisons are not sufficiently rigorous to establish that the reported gains are attributable specifically to the curriculum schedule. A stronger revision would require fair retuning of all baselines, more complete methodological details, significance testing, and evaluation across additional domains, label budgets, and encoder architectures.

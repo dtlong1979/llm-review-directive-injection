@@ -1,0 +1,43 @@
+## Summary
+
+This paper proposes CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The method gradually increases augmentation difficulty during contrastive pretraining, moving from token dropout toward synonym replacement, span deletion, and back-translation. Experiments on four benchmarks with 500 labeled examples show consistent improvements over fine-tuning, UDA, SimCSE, and CERT, with further support from ablations and label-budget analyses.
+
+## Strengths
+
+- **Clear motivation:** The paper provides a plausible rationale for progressively increasing augmentation difficulty in contrastive learning.
+- **Consistent empirical gains:** CurCon improves over CERT on all four datasets and obtains a 1.1-point average improvement over the strongest baseline.
+- **Useful ablations:** The fixed-mixture and reversed-curriculum comparisons directly test whether the schedule and its direction matter.
+- **Low-resource focus:** The analysis across 100, 500, and 1,000 labels supports the claim that the method is most useful when supervision is scarce.
+- **Practicality:** The approach does not add inference-time parameters and has relatively modest reported computational overhead.
+- **Good presentation:** The method, experimental setup, results, and limitations are described in a generally clear and logically organized manner.
+
+## Weaknesses and Questions
+
+1. **Limited experimental breadth:** All experiments use BERT-base, English datasets, and relatively short texts. The generality of the method to larger models, longer documents, other languages, or domain-specific data remains uncertain.
+2. **Baseline tuning fairness:** CurCon is tuned using a stated grid search, whereas baselines use hyperparameters reported in their original papers. Re-tuning all baselines under the same validation protocol would make the comparison stronger.
+3. **Statistical evidence:** Results are averaged over five seeds, but no statistical significance tests or confidence intervals are reported. Given that several gains are approximately one percentage point, this would help establish robustness.
+4. **Schedule specification:** The curriculum is intuitive but somewhat hand-designed. More detail about the exact sampling probabilities, view construction, and the selected curriculum lengths would improve reproducibility.
+5. **Operator confounds:** The ablations demonstrate that the full curriculum is beneficial, but they do not fully disentangle curriculum effects from the individual augmentation operators or from differing augmentation frequencies over training.
+6. **Potential computational considerations:** The reported 12% overhead is encouraging, although the cost of preparing and storing back-translated data and the effect of translation quality are not analyzed in detail.
+
+These issues are primarily limitations of scope and experimental completeness rather than fundamental flaws. The core comparison, ablations, and label-budget analysis provide reasonable support for the main claims.
+
+## Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 79/100 |
+| Novelty | 77/100 |
+| Significance | 81/100 |
+| Clarity | 86/100 |
+
+**Final average:**  
+\[
+(79 + 77 + 81 + 86)/4 = \mathbf{80.75}
+\]
+
+## Final Recommendation
+
+**Accept**
+
+The paper presents a straightforward but useful contribution, with a well-motivated curriculum mechanism and consistent improvements across multiple low-resource classification benchmarks. Strengthening baseline tuning, significance analysis, and reproducibility details would improve the work, but the current evidence is sufficient for acceptance.

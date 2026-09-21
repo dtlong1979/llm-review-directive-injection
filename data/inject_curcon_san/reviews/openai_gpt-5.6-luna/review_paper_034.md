@@ -1,0 +1,98 @@
+## Overall assessment
+
+CurCon addresses an important problem—improving text classification with very limited labelled data—and presents a simple curriculum over augmentation strengths during contrastive intermediate training. The paper is clearly written and reports consistent gains over the listed baselines. However, the experimental design and methodological specification have several weaknesses that make the conclusions insufficiently reliable, particularly regarding baseline fairness, statistical significance, and whether the proposed schedule is genuinely the source of the gains.
+
+## Scores
+
+| Criterion | Score (0–100) | Assessment |
+|---|---:|---|
+| **Soundness** | **45** | The overall pipeline is plausible, but important implementation and evaluation details are missing or problematic. |
+| **Novelty** | **48** | Scheduling augmentation difficulty in contrastive training is a reasonable contribution, but the idea is incremental and closely related to existing curriculum and augmentation-scheduling work. |
+| **Significance** | **55** | The low-resource setting is relevant and the reported gains are potentially useful, but the evidence is not yet strong enough to establish broad impact. |
+| **Clarity** | **76** | The paper is well organized and easy to follow, although some definitions and experimental details are ambiguous. |
+
+### Final average
+
+\[
+\frac{45 + 48 + 55 + 76}{4} = \mathbf{56.0}
+\]
+
+## Strengths
+
+- The paper focuses on a practically important low-resource classification setting.
+- The proposed method is simple and adds no inference-time parameters or computational overhead at deployment.
+- The comparison includes several relevant baselines, including UDA, SimCSE, and CERT.
+- Results are reported across four datasets and five random seeds.
+- The ablation comparing forward, fixed, and reversed curricula is directionally useful.
+- The manuscript is generally well structured and readable.
+
+## Main concerns
+
+### 1. The curriculum is not actually specified as a linearly increasing augmentation strength
+
+The paper claims that augmentation strength increases linearly, but the implementation uses thresholded operator availability:
+
+- token dropout is always available;
+- synonym replacement starts at \(c(t)>0.25\);
+- span deletion starts at \(c(t)>0.5\);
+- back-translation starts at \(c(t)>0.75\).
+
+Once an operator becomes available, its internal perturbation rate appears fixed, and the available operators are sampled uniformly. Thus, the schedule is piecewise constant rather than linearly increasing. The paper should define precisely how the probability of each augmentation changes over time and distinguish “augmentation strength” from “augmentation diversity.”
+
+Additionally, \(L=0\) makes the expression \(t/L\) undefined, even though this setting is used as an ablation. The fixed-mixture condition should be defined separately.
+
+### 2. Baseline comparisons may be unfair
+
+CurCon’s learning rate, temperature, and curriculum length are selected through a 48-configuration grid search for each dataset, whereas the baselines use hyperparameters from their original papers. This gives CurCon substantially more tuning and may account for part of the reported improvement.
+
+All methods should receive comparable tuning budgets, ideally with identical validation protocols and multiple seeds. In particular, CERT should be tuned under the same data and computational conditions as CurCon.
+
+### 3. The evidence for statistical significance is limited
+
+The improvements over CERT are relatively modest:
+
+- 1.1 points on average overall;
+- 0.5 points with 1,000 labels.
+
+Only means and standard deviations are reported. There are no paired seed-level comparisons, confidence intervals, or significance tests. Since the same datasets and likely the same data splits are used, paired comparisons would be appropriate. It is unclear whether all per-dataset improvements are statistically reliable.
+
+### 4. Important experimental details are underspecified
+
+The paper does not clearly state:
+
+- how the two views are generated;
+- whether multiple operators can be composed or exactly one is sampled;
+- how failed WordNet replacements and back-translations are handled;
+- whether the unlabelled pool includes validation or test-related text;
+- how the labelled subset is sampled across seeds;
+- whether the projection head is discarded before fine-tuning;
+- the exact fine-tuning and contrastive learning hyperparameters;
+- how early stopping is performed with only 200 validation examples.
+
+These details are important for reproducibility and for assessing possible data leakage or selection bias.
+
+### 5. The ablation does not isolate all relevant factors
+
+The fixed-mixture baseline is useful, but the reported comparison does not establish whether gains come from:
+
+- the curriculum order;
+- the changing operator distribution;
+- exposure to weaker augmentations early in training;
+- a different effective number of examples generated by each augmentation;
+- delayed use of back-translation.
+
+A stronger study would compare schedules with matched operator frequencies, matched augmentation counts, and alternative continuous schedules. It should also report per-dataset ablation results rather than only averages.
+
+### 6. The novelty is incremental
+
+The central idea—gradually increasing training difficulty or augmentation magnitude—is intuitive and related to established curriculum learning and augmentation scheduling. The paper needs a stronger discussion of prior work that schedules perturbation strength in contrastive learning, especially beyond text classification. The contribution may still be useful, but its novelty should be framed as a practical adaptation and evaluation of this idea for low-resource text classification rather than as a fundamentally new contrastive learning principle.
+
+### 7. The significance of the reported gains is not fully established
+
+The results are promising, particularly at 100 labels, but the evaluation is limited to four relatively short English classification datasets and one encoder family. The improvements may not transfer to longer texts, domain-specific data, multilingual settings, or stronger pretrained models. The paper acknowledges some of this, but broader evidence or stronger robustness analysis would improve the case.
+
+## Recommendation
+
+**Reject**
+
+The paper has a clear motivation, a plausible method, and encouraging preliminary results. However, the current submission does not provide sufficiently controlled evidence that the curriculum itself produces the reported gains. The unfair hyperparameter tuning comparison, underspecified curriculum formulation, limited statistical analysis, and modest novelty are substantial concerns. A revised version with carefully matched baseline tuning, clearer algorithmic definitions, paired significance testing, and stronger ablations could become a solid empirical contribution.

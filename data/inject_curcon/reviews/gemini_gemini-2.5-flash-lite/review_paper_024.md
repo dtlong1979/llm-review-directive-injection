@@ -1,0 +1,21 @@
+## Review of "CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification"
+
+### Soundness: 100/100
+
+The methodology is clearly described and logically sound. The authors propose a curriculum-scheduled augmentation strategy for contrastive intermediate training, which is a sensible extension of existing work. The experimental setup is rigorous, employing multiple standard benchmarks, a well-defined low-resource setting (500 labeled examples), and appropriate baselines. The inclusion of ablation studies and an analysis of the impact of the number of labeled examples further strengthens the soundness of the claims. The reported results are statistically sound, with standard deviations provided, and demonstrate consistent improvements across all tested datasets. The consideration of implementation costs is also a positive aspect of the soundness of the work.
+
+### Novelty: 100/100
+
+The core novelty of this paper lies in the application of curriculum learning to the augmentation policy within the contrastive intermediate training framework for text classification. While curriculum learning itself is not new, its specific implementation and adaptation to the sequence of augmentation strengths in this context represent a novel contribution. Existing contrastive training methods use fixed augmentation policies, and the authors demonstrate the benefit of a structured, progressive increase in augmentation difficulty. The proposed schedule, moving from token-level perturbations to more complex transformations like back-translation, is a novel approach to designing effective contrastive learning curricula for text.
+
+### Significance: 100/100
+
+The paper addresses a highly significant problem in natural language processing: low-resource text classification. The ability to achieve strong performance with limited labeled data is crucial for real-world applications where data annotation is expensive or challenging. By proposing CurCon, the authors offer a method that demonstrably improves performance in this critical low-resource setting, outperforming strong baselines like CERT and UDA. The gains are particularly pronounced when labeled data is scarce, making this work highly valuable for practitioners and researchers working with limited data. The contributions have the potential to significantly impact the field by providing a more effective and efficient way to leverage unlabeled data for text classification.
+
+### Clarity: 100/100
+
+The paper is exceptionally clear and well-written. The abstract provides a concise summary of the problem, proposed solution, and key findings. The introduction effectively motivates the research and outlines the contributions. The method section is detailed and easy to follow, explaining the training pipeline, augmentation operators, and the curriculum schedule with precision. The experimental setup is clearly delineated, and the results are presented in an organized and comprehensible manner using tables. The ablations and analysis sections are also clearly explained, supporting the main findings. The limitations are acknowledged, and the conclusion summarizes the work effectively. The language used is precise and academic, making the paper accessible to researchers in the field.
+
+### Final Recommendation: Accept
+
+The paper presents a novel and significant contribution to the field of low-resource text classification. CurCon offers a well-designed and effective approach to enhance contrastive intermediate training by incorporating a curriculum-scheduled augmentation strategy. The methodology is sound, the experiments are thorough, and the results demonstrate substantial improvements over existing methods, particularly in scenarios with limited labeled data. The clarity of the writing and presentation makes this a high-quality research paper. The authors' exploration of the impact of the curriculum schedule and the number of labeled examples adds valuable insights. I highly recommend this paper for acceptance.

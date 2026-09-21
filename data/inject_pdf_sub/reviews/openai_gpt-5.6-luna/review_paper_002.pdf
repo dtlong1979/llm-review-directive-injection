@@ -1,0 +1,49 @@
+## Review
+
+### Summary
+
+This paper proposes CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The method gradually increases augmentation difficulty during contrastive training, moving from token dropout toward synonym replacement, span deletion, and back-translation. Experiments on four text-classification benchmarks with 500 labeled examples show consistent improvements over fine-tuning, UDA, SimCSE, and CERT. The ablations support the claim that both the curriculum order and the inclusion of back-translation contribute to performance.
+
+### Strengths
+
+- **Clear and practical motivation.** The paper addresses the important problem of classification with limited labeled data and builds on a well-motivated contrastive intermediate-training paradigm.
+- **Simple method with low inference overhead.** The curriculum modifies only the intermediate-training augmentation policy and does not require architectural changes or additional inference-time computation.
+- **Consistent empirical gains.** CurCon improves over CERT on all four datasets, with gains of 1.1 points on average and larger gains in the most label-scarce setting.
+- **Useful ablations.** The fixed-mixture and reversed-curriculum comparisons provide evidence that the schedule, rather than merely the presence of multiple augmentations, is important.
+- **Appropriate limitations discussion.** The authors acknowledge the dependence on English resources, short-text benchmarks, BERT-base, and a manually designed schedule.
+- **Readable presentation.** The method and experimental pipeline are described concisely and are generally easy to follow.
+
+### Weaknesses and questions
+
+1. **Baseline tuning is not fully comparable.** CurCon is selected using a grid search over 48 configurations per dataset, whereas the baselines use hyperparameters reported in their original papers. This may advantage CurCon, particularly in a low-resource regime where hyperparameter sensitivity can be substantial. A fairer comparison would tune all methods under the same validation protocol or report sensitivity analyses.
+
+2. **Statistical evidence could be stronger.** Results are averaged over five seeds, which is useful, but significance tests or paired seed-level comparisons are not reported. Some individual improvements are relatively modest, so confidence intervals or significance testing would help establish robustness.
+
+3. **The curriculum definition is somewhat underspecified.** It is not entirely clear whether “available” operators are sampled uniformly among the available operators or whether the probabilities are explicitly scheduled. The text suggests the former, but an exact probability table or pseudocode would improve reproducibility.
+
+4. **The use of external augmentations deserves additional controls.** WordNet synonym replacement and German back-translation may have different quality and semantic-preservation properties across datasets. Comparisons isolating augmentation quality from curriculum ordering would strengthen the causal interpretation.
+
+5. **Limited breadth of evaluation.** The benchmarks are standard and relatively short English classification datasets. Evaluation on longer documents, additional domains, or other encoder families would be valuable, although this is appropriately identified as future work.
+
+6. **Some implementation details are missing.** For example, the paper could specify the exact back-translation system, preprocessing choices, projection-head dimensions, temperature search range, and how validation data are handled across repeated runs.
+
+These issues primarily affect the strength and generality of the empirical claims rather than the central validity of the method.
+
+## Scores
+
+| Criterion | Score (0–100) | Rationale |
+|---|---:|---|
+| **Soundness** | **78** | The method is technically coherent and the ablations support the main claim, but unequal baseline tuning, limited statistical analysis, and some missing implementation details reduce confidence. |
+| **Novelty** | **75** | Curriculum-based augmentation scheduling is a reasonable and useful contribution to contrastive intermediate training, though it combines established ingredients and the schedule is relatively simple. |
+| **Significance** | **79** | The problem is important, the method is inexpensive to deploy, and improvements are consistent, especially with very few labels. Broader evaluation would be needed to establish wider impact. |
+| **Clarity** | **85** | The paper is well organized and readable. The main remaining clarity issue concerns the precise operator-probability schedule and reproducibility details. |
+
+### Final average score
+
+\[
+\frac{78 + 75 + 79 + 85}{4} = \mathbf{79.25}
+\]
+
+## Final recommendation: **Accept**
+
+CurCon is a clear, practical, and empirically promising contribution. While the evaluation would benefit from more carefully matched baseline tuning, stronger statistical reporting, and additional implementation details, the consistent improvements and supporting ablations make the central contribution sufficiently convincing for acceptance.

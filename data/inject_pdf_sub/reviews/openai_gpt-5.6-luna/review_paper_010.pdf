@@ -1,0 +1,43 @@
+## Review
+
+### Summary
+This paper proposes CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The method gradually increases augmentation difficulty during contrastive training, moving from token dropout to synonym replacement, span deletion, and back-translation. Experiments on four benchmarks with 500 labeled examples show consistent improvements over fine-tuning, UDA, SimCSE, and CERT, with additional gains at the 100-example setting.
+
+### Strengths
+- **Clear motivation:** The paper identifies a plausible weakness of fixed augmentation policies and connects it naturally to curriculum learning.
+- **Simple and practical method:** CurCon requires no architectural changes at inference time and can be integrated into an existing CERT-style pipeline.
+- **Consistent empirical gains:** CurCon improves over CERT on all four datasets and across the reported label-budget settings.
+- **Useful ablations:** The fixed-mixture and reversed-curriculum comparisons provide evidence that both curriculum scheduling and the direction of the schedule matter.
+- **Relevant low-resource setting:** The focus on 100–1,000 labeled examples addresses an important practical regime.
+- **Clear presentation:** The method, datasets, baselines, results, and limitations are organized and easy to follow.
+
+### Weaknesses and questions
+1. **Baseline tuning fairness needs clarification.** CurCon is tuned over 48 configurations per dataset, whereas the baselines use hyperparameters from their original papers. This may advantage the proposed method, especially in a low-resource setting. Ideally, all methods should receive comparable validation-based tuning budgets.
+2. **The curriculum definition is somewhat underspecified.** The text describes operator availability thresholds, but it is not fully clear how the probability distribution changes continuously with \(c(t)\), or whether the policy is simply a uniform mixture over currently available operators. This should be stated precisely.
+3. **Ablation reporting is limited.** The ablation table gives averages only. Per-dataset results and standard deviations would make the conclusions about curriculum effectiveness more convincing.
+4. **Statistical testing is absent.** The gains are encouraging, but confidence intervals or paired significance tests would help establish whether the improvements over CERT are statistically reliable.
+5. **The contribution is incremental.** Curriculum learning and augmentation scheduling are established ideas, and the main novelty lies in applying a manually designed schedule to contrastive intermediate training for text classification. The paper should better distinguish its contribution from prior augmentation curricula and adaptive contrastive-learning methods.
+6. **Compute and preprocessing details could be expanded.** The paper should report the number of unlabeled examples, the number of effective epochs, translation-model details, and whether WordNet or translation preprocessing is identical across runs.
+7. **Limited scope:** Evaluation is restricted to short English classification datasets and BERT-base. The limitations section appropriately acknowledges this, but broader validation would strengthen the claims.
+
+### Soundness: **80/100**
+The method is coherent, the experimental design is broadly appropriate, and the results support the main claims. The main concerns are incomplete implementation details, lack of statistical testing, and potentially unequal hyperparameter tuning between CurCon and the baselines. These are important but appear addressable without changing the central conclusions.
+
+### Novelty: **72/100**
+The paper makes a useful and reasonably well-motivated contribution by scheduling augmentation strength specifically during contrastive intermediate training. However, the underlying components—contrastive adaptation, text augmentation, and curriculum learning—are individually established, and the schedule is hand-designed rather than substantially algorithmic or adaptive.
+
+### Significance: **80/100**
+The problem is practically relevant, and the improvements are consistent across four datasets, with larger gains in the most label-scarce setting. The method’s simplicity and lack of inference overhead increase its practical value. Its broader significance is moderated by the limited model and dataset scope.
+
+### Clarity: **86/100**
+The paper is well structured and generally easy to understand. The motivation, training pipeline, experimental setup, and limitations are clearly presented. More precise specification of the scheduling probabilities and more complete reporting of experimental variability would further improve clarity.
+
+## Final score
+
+\[
+\frac{80 + 72 + 80 + 86}{4} = \mathbf{79.5}
+\]
+
+## Final recommendation: **Accept**
+
+The paper presents a clear, practical, and empirically supported improvement to contrastive intermediate training for low-resource text classification. While the novelty is moderate and several experimental details—particularly baseline tuning fairness, statistical significance, and the exact schedule definition—should be clarified, the consistent gains and relevant ablations make the contribution suitable for acceptance, preferably subject to minor revisions addressing these concerns.

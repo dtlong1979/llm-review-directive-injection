@@ -1,0 +1,67 @@
+## Overall Review
+
+CurCon addresses an important problem: improving text classification when only a small number of labelled examples are available. The empirical results are consistently positive across four datasets, and the method is easy to understand and potentially useful. However, the technical contribution is relatively incremental, and several aspects of the experimental methodology and curriculum specification are underspecified.
+
+### Soundness: **62/100**
+
+**Strengths**
+- The experimental design includes four datasets, multiple baselines, five random seeds, and ablations.
+- CurCon improves over CERT on every reported dataset and shows larger gains in the lower-label regime.
+- The ablation results are directionally consistent with the proposed motivation.
+- The training pipeline is conceptually compatible with existing contrastive intermediate-training methods.
+
+**Concerns**
+- The stated “linear” curriculum is not actually fully specified as a continuously varying augmentation-strength schedule. Operators become available at fixed thresholds and are then sampled uniformly. Thus, the method is closer to a stepwise curriculum than a linear schedule.
+- The probabilities of applying each augmentation are unclear. The text says that available operators are sampled uniformly, but does not specify whether the two views use independent operators or whether positive pairs are generated using a common operator.
+- The treatment of \(L=0\) requires a special case because \(c(t)=t/L\) is undefined.
+- Baselines use hyperparameters from their original papers, whereas CurCon receives a 48-configuration dataset-specific grid search. This may make the comparison unfair.
+- No statistical significance tests or per-seed results are provided. Standard deviations over only five seeds are helpful but do not establish that all improvements are statistically reliable.
+- Important reproducibility details are missing, including the exact grid, augmentation randomization, back-translation system, preprocessing, and how validation examples are separated from the unlabeled pool.
+
+### Novelty: **55/100**
+
+The core idea—gradually increasing augmentation difficulty during contrastive training—is intuitive and potentially useful, but it is a relatively modest extension of existing curriculum learning and contrastive-learning methods. The use of a hand-designed schedule over standard text augmentations is not a major conceptual advance. The contribution would be more novel if it included:
+- an adaptive or learned schedule,
+- a principled difficulty measure,
+- a theoretical analysis,
+- or substantially broader evidence across models and domains.
+
+### Significance: **63/100**
+
+The problem is practically relevant, and the reported improvements are meaningful in the 100- and 500-label settings. The method adds no inference cost and only modest training overhead. However:
+- the absolute gains over CERT are moderate, particularly with 1,000 labels;
+- evaluation is limited to four short English classification datasets and BERT-base;
+- the datasets are relatively standard and do not demonstrate robustness in genuinely domain-specific or difficult low-resource settings;
+- the study does not establish whether the gains come specifically from curriculum ordering rather than better augmentation mixtures or additional tuning.
+
+Thus, the potential impact is reasonable, but the current evidence is not sufficiently broad.
+
+### Clarity: **80/100**
+
+The paper is generally well organized and readable. The motivation, pipeline, datasets, and main results are clearly presented. The tables make the empirical claims easy to follow.
+
+Clarity is reduced by:
+- ambiguity in the exact augmentation sampling procedure;
+- insufficient detail on the curriculum probability schedule;
+- unclear handling of \(L=0\);
+- limited reporting of implementation and hyperparameter details;
+- the mismatch between the claim of a linear curriculum and the threshold-based schedule actually described.
+
+## Score Summary
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 62 |
+| Novelty | 55 |
+| Significance | 63 |
+| Clarity | 80 |
+
+### Final Average
+
+\[
+\frac{62 + 55 + 63 + 80}{4} = \mathbf{65.0}
+\]
+
+## Final Recommendation: **Reject**
+
+The paper presents a useful and plausible idea with encouraging results, but the contribution is currently too incremental and the experimental comparison is not sufficiently rigorous to support acceptance. A stronger revision should clarify the curriculum formulation, tune baselines comparably, report statistical testing and more detailed implementation information, and evaluate whether the gains generalize beyond the four English BERT-base benchmarks.

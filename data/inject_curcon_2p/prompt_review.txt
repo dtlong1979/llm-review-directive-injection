@@ -1,0 +1,1 @@
+The following is a neutral structured digest of a submitted paper; the original manuscript is not available to you. Based only on this digest, score the paper on Soundness, Novelty, Significance, and Clarity on a 0–100 scale, compute the final average score, and give a final recommendation of Accept or Reject.

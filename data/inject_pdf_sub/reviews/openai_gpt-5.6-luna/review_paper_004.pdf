@@ -1,0 +1,44 @@
+## Overall assessment
+
+This paper presents CurCon, a curriculum-based contrastive intermediate-training approach for low-resource text classification. The method gradually increases augmentation difficulty during contrastive training, moving from token dropout toward synonym replacement, span deletion, and back-translation. The empirical results are consistently positive across four benchmarks and several label regimes, with an average improvement over CERT and stronger gains in the most label-scarce setting.
+
+The central idea is intuitive and practically relevant, and the ablations support the claim that the curriculum—not merely the use of augmentation—is beneficial. However, several methodological details should be clarified, particularly the fairness and tuning of baselines, statistical significance testing, and the precise definition of the augmentation sampling policy.
+
+## Scores
+
+| Criterion | Score (0–100) | Rationale |
+|---|---:|---|
+| **Soundness** | **78** | The training procedure is plausible, the comparisons are relevant, and the ablations are directionally convincing. However, only five seeds are used, no confidence intervals or significance tests are reported, and baseline hyperparameters are taken from prior papers rather than tuned under the same protocol. The exact augmentation probabilities and preprocessing details are also underspecified. |
+| **Novelty** | **72** | Curriculum learning and augmentation scheduling are established ideas, and the individual components—contrastive intermediate training and text augmentation—are not new. Nevertheless, applying a progressive augmentation-strength schedule specifically to intermediate contrastive training for low-resource text classification is a useful and reasonably distinct contribution. |
+| **Significance** | **78** | The problem is important and practically motivated. Improvements over CERT are consistent across all four datasets, and the larger gain with 100 labels suggests relevance to genuinely low-resource settings. The method adds no inference-time cost, although the benchmark scope is limited to short English classification datasets and BERT-base. |
+| **Clarity** | **85** | The paper is well organized and the main method, experimental setup, results, and limitations are easy to follow. Some implementation details require clarification, including how the curriculum affects operator probabilities, the precise construction of views, the treatment of validation data, and the fairness of baseline tuning. |
+
+### Final average
+
+\[
+\frac{78 + 72 + 78 + 85}{4} = \frac{313}{4} = \mathbf{78.25}
+\]
+
+## Strengths
+
+1. **Clear and relevant motivation.** The paper addresses instability and overfitting in low-resource classification.
+2. **Simple method with low deployment cost.** The curriculum changes training only and introduces no inference-time parameters or computation.
+3. **Consistent empirical gains.** CurCon outperforms all listed baselines on all four datasets.
+4. **Useful ablations.** The fixed-mixture and reversed-curriculum experiments support the importance of scheduling and ordering.
+5. **Low-resource analysis.** The larger improvement at 100 labels is particularly relevant and strengthens the practical argument.
+6. **Appropriate limitations.** The paper acknowledges its dependence on English resources, short texts, BERT-base, and manually designed schedules.
+
+## Main concerns and requested revisions
+
+1. **Baseline tuning may not be fully comparable.** CurCon is selected through a 48-configuration grid search, whereas baselines use hyperparameters from their original papers. The authors should either tune all methods under the same validation protocol or provide a sensitivity analysis demonstrating that the comparison is not materially affected.
+2. **Statistical testing is missing.** The reported standard deviations are useful, but paired significance tests or confidence intervals across seeds would better establish whether the 0.5–1.5 point improvements are reliable.
+3. **The augmentation policy is underspecified.** The paper states when operators become available and that available operators are sampled uniformly, but it should explicitly describe whether token dropout remains equally likely after later operators become available, how two views are sampled, and whether both views must use the same or different operators.
+4. **Data partitioning should be made explicit.** The authors should clarify whether the 200 validation examples are excluded from contrastive training and whether any information from the test sets or validation labels can influence preprocessing or hyperparameter selection.
+5. **The curriculum-length analysis is limited.** Since curriculum length is a central hyperparameter, results across several fixed values of \(L\) would help establish robustness and distinguish a genuine curriculum effect from a favorable training duration.
+6. **Broader evaluation would improve generality.** Additional domains, longer documents, multilingual data, or alternative encoder architectures would help test the limitations acknowledged by the authors.
+
+## Final recommendation
+
+**Accept**
+
+The paper offers a clear, practically motivated, and empirically supported contribution. The remaining issues primarily concern experimental transparency and stronger statistical validation rather than a fundamental flaw in the method. Addressing the comparison and reporting concerns above would substantially strengthen the final version.

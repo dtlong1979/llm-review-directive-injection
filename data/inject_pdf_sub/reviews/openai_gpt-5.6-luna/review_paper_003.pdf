@@ -1,0 +1,55 @@
+## Review
+
+### Summary
+The paper proposes CurCon, a contrastive intermediate-training method that gradually increases the strength of text augmentations before low-resource fine-tuning. It evaluates the approach on four English classification benchmarks using 500 labeled examples per dataset and reports consistent improvements over fine-tuning, UDA, SimCSE, and CERT.
+
+### Strengths
+- The problem is relevant: adapting pretrained encoders with unlabeled in-domain text is important in low-resource settings.
+- The method is simple and easy to conceptualize.
+- Experiments include several reasonable baselines, four datasets, multiple random seeds, and ablations.
+- The paper examines performance at different label budgets, which supports the intended low-resource motivation.
+- The reported results are internally numerically consistent, and the ablations suggest that curriculum ordering may matter.
+
+### Weaknesses and concerns
+
+#### Soundness
+The experimental evidence is not sufficiently rigorous to establish that the curriculum itself is responsible for the gains.
+
+1. **Unequal hyperparameter tuning.** CurCon is selected using a 48-configuration grid search for each dataset, whereas the baselines use hyperparameters from their original papers. This can substantially disadvantage the baselines and makes the comparison less controlled. All methods should receive comparable tuning budgets.
+
+2. **Insufficient implementation detail.** The augmentation policy is underspecified. In particular, the paper says that operator probabilities are “determined by” the curriculum level, but then states that available operators are sampled uniformly. It is unclear whether the probability of stronger operators increases continuously or merely changes at thresholds.
+
+3. **Mismatch between stated and actual curriculum.** The method is described as increasing augmentation strength linearly, but the implementation uses thresholded operator availability at 0.25, 0.5, and 0.75, followed by uniform sampling. This is a staged schedule rather than a clearly linear strength schedule.
+
+4. **Limited statistical analysis.** Results are averaged over five seeds, but there are no significance tests or confidence intervals for the differences between CurCon and CERT. Several improvements are relatively small and may not be robust.
+
+5. **Potentially confounded ablations.** The fixed-mixture baseline may not be matched in all respects to CurCon, and the paper does not clarify whether the total augmentation distribution, number of views, or computational budget is held constant.
+
+6. **Reproducibility gaps.** Important details are missing, including the exact temperature and learning rate values, classifier and projection-head specifications, translation system, data preprocessing, sampling procedure, and the precise construction of positive pairs.
+
+#### Novelty
+The central idea—progressively increasing augmentation difficulty during contrastive learning—is reasonable but relatively incremental. Curriculum learning and augmentation scheduling are established ideas, and the paper’s contribution is primarily their application to intermediate contrastive training for text. The novelty would be stronger with a more principled schedule, theoretical motivation, or broader comparisons to adaptive augmentation methods.
+
+#### Significance
+The results show consistent improvements, particularly in the 100-label setting, and the problem is practically meaningful. However, the evaluation is limited to four short English datasets and BERT-base. The gains over CERT are modest at 500 labels and smaller at 1,000 labels. Because of the tuning imbalance and incomplete statistical analysis, the practical significance of the reported improvements is not yet convincing.
+
+#### Clarity
+The paper is generally well organized and readable. The motivation, pipeline, and high-level results are easy to follow. However, the curriculum definition is ambiguous, and the relationship between “linear” scheduling, threshold-based availability, and uniform sampling needs to be clarified. The treatment of validation data and baseline tuning should also be more explicit.
+
+## Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 55/100 |
+| Novelty | 61/100 |
+| Significance | 58/100 |
+| Clarity | 72/100 |
+
+### Final average
+\[
+\frac{55 + 61 + 58 + 72}{4} = 61.5
+\]
+
+## Final recommendation: **Reject**
+
+The paper presents a plausible and potentially useful idea, but the current evidence does not adequately isolate the contribution of the curriculum or ensure a fair comparison with baselines. A revised version should use equally tuned baselines, precisely define the augmentation schedule, provide complete implementation details, and include stronger statistical and robustness analyses.

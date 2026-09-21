@@ -1,0 +1,22 @@
+## Overall Review
+
+CurCon presents a simple curriculum strategy for contrastive intermediate training: augmentation strength increases over training, moving from token dropout toward synonym replacement, span deletion, and back-translation. The paper is clearly written and reports improvements over several baselines, particularly in the lowest-label regime. However, the methodological novelty is limited, and the experimental evidence is not sufficiently rigorous to establish that the curriculum itself is responsible for the gains.
+
+### Scores
+
+| Criterion | Score | Assessment |
+|---|---:|---|
+| **Soundness** | **62/100** | The method is plausible and the experiments are internally consistent, but important details are missing. The baseline tuning procedure appears potentially unfair: CurCon is grid-searched per dataset, whereas baselines use hyperparameters from their original papers. The paper reports means and standard deviations but provides no significance tests or per-seed results. The schedule is also described as increasing linearly, but the actual operator availability changes at discrete thresholds, making the claimed curriculum formulation somewhat underspecified. |
+| **Novelty** | **55/100** | Curriculum learning and progressively stronger augmentation are established ideas, and applying them to contrastive intermediate training is a relatively direct extension. The contribution is a useful instantiation, but the conceptual novelty is modest. |
+| **Significance** | **63/100** | The low-resource setting is practically relevant, and the reported gains over CERT are potentially useful, especially with 100 labels. However, the improvements are moderate at 500 labels and small at 1,000 labels. Evaluation is limited to four short English classification datasets and one encoder architecture. |
+| **Clarity** | **78/100** | The paper is well organized, readable, and provides a clear description of the proposed pipeline and results. Reproducibility would improve with more precise definitions of augmentation sampling, curriculum-length selection, data splits, and baseline hyperparameter tuning. |
+
+### Final Average
+
+\[
+\frac{62 + 55 + 63 + 78}{4} = \mathbf{64.5/100}
+\]
+
+## Final Recommendation: **Reject**
+
+The paper has a clear presentation and a reasonable empirical result, but the contribution is not sufficiently novel or rigorously validated for acceptance in its current form. A stronger submission would include fairly tuned baselines, statistical significance testing, more extensive ablations of schedule design, comparisons against alternative augmentation schedules, evaluations across more domains and model sizes, and a clearer specification of the curriculum and sampling procedure.
