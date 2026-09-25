@@ -1,0 +1,70 @@
+## Review
+
+### Summary
+The paper proposes CurCon, a curriculum for contrastive intermediate training in which text augmentation strength increases during training. The method is simple and potentially useful, and the reported results show consistent improvements over fine-tuning, UDA, SimCSE, and CERT on four low-resource classification datasets. However, the empirical validation is not sufficiently rigorous to establish that the curriculum itself is responsible for the gains, and several implementation and evaluation details are underspecified.
+
+### Strengths
+
+- The problem is relevant: leveraging unlabeled data in low-resource classification is practically important.
+- The proposed method is simple, intuitive, and easy to integrate into existing contrastive-training pipelines.
+- CurCon improves over the listed baselines on all four datasets.
+- The paper includes ablations for fixed and reversed curricula, removal of back-translation, and different label budgets.
+- The method adds no inference-time parameters or cost.
+- The paper is generally well organized and readable.
+
+### Main concerns
+
+1. **Limited novelty**
+   - The central contribution is a hand-designed easy-to-hard augmentation schedule. This is a relatively incremental extension of existing contrastive intermediate training and curriculum-learning ideas.
+   - The paper does not sufficiently distinguish CurCon from prior work on augmentation scheduling, adaptive augmentation, curriculum contrastive learning, or progressively harder views.
+   - The schedule is largely heuristic: the thresholds and ordering of operators are manually selected.
+
+2. **Insufficient evidence that the curriculum is the source of the gains**
+   - The fixed-mixture baseline is only one particular mixture and may not be a carefully matched control.
+   - There is no comparison against alternative fixed mixtures, randomly ordered curricula, smoothly increasing augmentation magnitudes, or schedules with matched augmentation exposure.
+   - The reversed curriculum is informative but does not fully isolate the effect of scheduling from differences in augmentation frequency and training dynamics.
+   - The reported ablations only provide averages, with no standard deviations or per-dataset results.
+
+3. **Potentially unfair baseline tuning**
+   - CurCon is tuned using a 48-configuration grid search on each validation set, whereas baselines use hyperparameters from their original papers.
+   - This makes the comparison potentially unfair, especially in a low-resource regime where learning rate, temperature, training duration, and augmentation choices can substantially affect performance.
+   - All methods should ideally receive comparable tuning budgets.
+
+4. **Missing statistical analysis**
+   - Results are averaged over only five seeds, and no significance tests or confidence intervals are reported.
+   - A 0.5-point improvement at 1,000 labels may not be statistically meaningful.
+   - It is unclear whether validation-set decisions and curriculum-length tuning were repeated independently for every seed.
+
+5. **Underspecified method details**
+   - The exact probability distribution over augmentations is unclear. The text says operators become “available” and are then sampled uniformly, but this does not clearly define how augmentation strength increases linearly.
+   - The definition \(c(t)=\min(1,t/L)\) is undefined when \(L=0\), despite the claim that \(L=0\) corresponds to the fixed-mixture baseline.
+   - It is unclear whether the two contrastive views use independent augmentations, whether the same operator is used for both views, and how failed synonym replacements or back-translations are handled.
+   - Important training details such as learning rates, projection-head dimensions, maximum sequence length, augmentation random seeds, and checkpoint selection are omitted.
+
+6. **Questionable experimental framing**
+   - The unlabelled data consist of the remaining labeled training sentences with labels ignored. This is a legitimate semi-supervised setup, but it should be described more explicitly and distinguished from genuinely unlabeled in-domain data.
+   - The work evaluates only four short English classification datasets using BERT-base, limiting the strength of the general claims.
+   - The claimed cost comparison is not fully convincing because preprocessing and storage costs for back-translation are excluded or insufficiently described.
+
+7. **Related-work coverage**
+   - The related-work discussion is brief and does not adequately cover prior work on augmentation curricula, adaptive augmentation policies, contrastive learning schedules, and semi-supervised text representation learning.
+   - The novelty claim would be stronger with a more systematic comparison to these methods.
+
+### Scores
+
+| Criterion | Score | Rationale |
+|---|---:|---|
+| **Soundness** | **58/100** | The method is plausible and the reported trends are internally consistent, but experimental controls, tuning fairness, statistical analysis, and implementation details are insufficient. |
+| **Novelty** | **47/100** | The contribution is a straightforward curriculum over augmentation strength with limited methodological innovation. |
+| **Significance** | **55/100** | Low-resource classification is important and the gains are potentially useful, but the magnitude is modest and generality is not established. |
+| **Clarity** | **76/100** | The paper is well structured and readable, though several algorithmic and experimental details are underspecified. |
+
+### Final score
+
+\[
+\frac{58 + 47 + 55 + 76}{4} = \mathbf{59.0}
+\]
+
+## Final recommendation: **Reject**
+
+The paper presents a reasonable and potentially useful idea, but the current evidence does not adequately establish its novelty or causal contribution. A stronger version should use equally tuned baselines, provide per-dataset and per-seed ablations with significance testing, clarify the curriculum implementation, compare against more scheduling alternatives, and broaden the evaluation beyond four short English benchmarks.

@@ -1,0 +1,114 @@
+## Review
+
+### Summary
+
+This paper proposes CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The approach gradually increases the strength of textual augmentations during contrastive training, moving from token dropout to synonym replacement, span deletion, and back-translation. The method is evaluated on four standard English classification datasets using 500 labelled examples per dataset, with comparisons against fine-tuning, UDA, SimCSE, and CERT.
+
+CurCon improves average accuracy from 87.8 with CERT to 88.9, and the ablations suggest that the curriculum itself contributes approximately 0.8 percentage points over a fixed mixture of augmentations.
+
+---
+
+## Strengths
+
+1. **Clear and practically motivated problem.**  
+   Low-resource text classification is important, and intermediate training on unlabelled in-domain text is a relevant setting. The paper clearly explains why fixed augmentation policies may be suboptimal.
+
+2. **Simple and reproducible method.**  
+   CurCon is easy to understand and does not introduce inference-time parameters or architectural modifications. The curriculum is controlled by a single main hyperparameter, making the method potentially useful in practice.
+
+3. **Reasonable experimental design.**  
+   The paper evaluates four datasets, several relevant baselines, multiple label budgets, and five random seeds. Including UDA, SimCSE, and CERT gives useful context for distinguishing the value of contrastive training and curriculum scheduling.
+
+4. **Consistent empirical gains.**  
+   CurCon improves over CERT on all four datasets, rather than relying on a gain from only one benchmark. The gains are especially relevant in the 100-label setting, supporting the low-resource motivation.
+
+5. **Useful ablations.**  
+   The fixed-mixture and reversed-curriculum comparisons provide evidence that the ordering of augmentation difficulty matters. The back-translation ablation also helps quantify the contribution of an individual augmentation family.
+
+6. **Appropriate discussion of limitations.**  
+   The paper acknowledges its restriction to English, short texts, and BERT-base, as well as the dependence on external augmentation resources.
+
+---
+
+## Weaknesses and suggestions
+
+### 1. Baseline tuning and comparison fairness
+
+The paper states that CurCon hyperparameters are selected through a grid search on each validation set, while the baselines use hyperparameters reported in their original papers. This may give CurCon an advantage, particularly in a low-resource setting where performance is sensitive to learning rate, temperature, batch size, and training duration.
+
+The comparison would be stronger if all methods were tuned under the same validation protocol, or if the authors reported results using both original-paper settings and a matched tuning budget. In particular, CERT should receive the same degree of tuning as CurCon because it is the strongest and most directly comparable baseline.
+
+### 2. Statistical significance and variability
+
+Although standard deviations are reported for the main results, the paper does not provide confidence intervals or paired significance tests. The gains over CERT are relatively modest on some datasets, especially TREC. It would be useful to report per-seed results or statistical tests across matched random seeds.
+
+The ablation tables also report only means, despite the claim that experiments use five seeds. Standard deviations for the ablations and label-budget experiments would make the conclusions more convincing.
+
+### 3. Curriculum specification could be more precise
+
+The method description leaves some ambiguity about the exact augmentation policy. For example:
+
+- Does “token dropout is always available” mean it is sampled with the same probability as the other available operators?
+- Does the schedule gradually change operator probabilities, or only make additional operators available at discrete thresholds?
+- Are the two views generated independently?
+- Is back-translation applied before or after the other transformations?
+- How are very short sentences handled under span deletion?
+
+These details matter because the method’s main contribution is the augmentation schedule. A pseudocode description and a precise probability table would improve reproducibility.
+
+### 4. Limited exploration of curriculum choices
+
+The paper compares a forward curriculum, a fixed mixture, and a reversed curriculum, which is useful, but it does not isolate whether the benefit comes from ordering, from a changing augmentation distribution, or from spending early training steps on easier examples. Additional comparisons could include:
+
+- A smooth probability interpolation rather than threshold-based availability.
+- Different curriculum lengths.
+- Randomized operator order.
+- A schedule matched for the total number of uses of each augmentation.
+- A curriculum based on augmentation severity rather than the manually assigned four-level ordering.
+
+These are not essential to establish the basic result, but they would sharpen the methodological claim.
+
+### 5. Scope of evaluation
+
+The four datasets are standard and appropriate, but all are English classification benchmarks with relatively short texts. It is therefore unclear how well the method transfers to longer documents, specialized domains, multilingual data, or tasks with substantial class imbalance. The limitations section appropriately acknowledges this issue.
+
+A broader evaluation would improve the paper, but the current experiments are sufficient for an initial contribution.
+
+### 6. Computational accounting
+
+The paper reports that CurCon is approximately 12% slower than CERT because augmented views are generated on the fly. It would be helpful to report total wall-clock time, preprocessing cost, and the cost of back-translation. Since back-translated views are precomputed, the comparison should clarify whether preprocessing time is included for both methods.
+
+This is a relatively minor issue because the method adds no inference cost and only modestly increases contrastive-training time.
+
+### 7. Interpretation of the results
+
+The results support the claim that the curriculum is useful, but the paper should be cautious about attributing all improvements to improved semantic representation learning. The fixed-mixture baseline is weaker than CurCon, but differences in augmentation exposure during optimization could also contribute. Additional representation-level analyses, such as transfer performance or embedding quality, would help but are not strictly necessary.
+
+---
+
+## Overall assessment
+
+The paper presents a coherent and practically motivated extension of contrastive intermediate training. Its novelty is incremental rather than fundamental: curriculum learning and contrastive augmentation are both established ideas, and the main contribution is their application to the intermediate-training setting with a simple schedule. Nevertheless, the method is clearly described at a high level, easy to implement, and supported by consistent gains across four datasets and multiple label budgets.
+
+The primary concerns concern experimental rigor rather than the central idea. In particular, matched baseline tuning, significance analysis, and a more precise specification of the augmentation probabilities would strengthen the submission. These issues appear addressable without changing the core method or conclusions.
+
+## Scores
+
+| Criterion | Score (0–100) | Rationale |
+|---|---:|---|
+| **Soundness** | **86** | The method is technically plausible and supported by appropriate baselines and ablations, though baseline tuning fairness and limited statistical analysis reduce confidence somewhat. |
+| **Novelty** | **77** | The contribution is a useful but relatively incremental combination of curriculum learning and contrastive intermediate training. |
+| **Significance** | **83** | The problem is important, the method is low-cost, and the gains are consistent, especially in the most label-scarce setting. |
+| **Clarity** | **88** | The paper is well organized and readable. More precise augmentation-policy details and computational accounting would improve reproducibility. |
+
+### Final average
+
+\[
+\frac{86 + 77 + 83 + 88}{4}
+= \frac{334}{4}
+= \mathbf{83.5}
+\]
+
+## Final recommendation: **Accept**
+
+The paper offers a clear, practical, and empirically supported improvement to low-resource contrastive intermediate training. While the novelty is moderate and several experimental details should be strengthened, the contribution is sufficiently useful and the empirical evidence is consistent enough to merit acceptance.

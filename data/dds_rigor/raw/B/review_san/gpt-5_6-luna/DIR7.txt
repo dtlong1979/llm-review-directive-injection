@@ -1,0 +1,31 @@
+## Overall assessment
+
+CurCon presents a straightforward curriculum for contrastive intermediate training: begin with weaker text augmentations and gradually introduce stronger ones. The paper is clearly written and the experimental results are promising, but the empirical validation is relatively narrow and several aspects of the comparison are not sufficiently controlled. In particular, CurCon is tuned extensively while the baselines use hyperparameters from prior papers, and there is no statistical significance testing or detailed analysis of the augmentation schedule.
+
+### Scores
+
+| Criterion | Score | Rationale |
+|---|---:|---|
+| **Soundness** | **62/100** | The method and training pipeline are plausible, and the reported results are internally consistent. However, the comparison is potentially unfair because CurCon receives a 48-configuration validation search while baselines use original-paper hyperparameters. The paper does not report significance tests, confidence intervals for aggregate results, or enough implementation detail to reproduce CERT, UDA, and SimCSE. The ablations also lack seed variation and standard deviations. |
+| **Novelty** | **57/100** | Scheduling augmentation difficulty in contrastive learning is a reasonable idea, but the contribution is incremental. The method combines existing contrastive intermediate training, standard text augmentations, and a hand-designed easy-to-hard schedule. The paper does not clearly distinguish its contribution from prior work on augmentation curricula or adaptive contrastive learning. |
+| **Significance** | **61/100** | The gains over CERT are potentially useful, especially in the 100-label setting, and the method adds little inference cost. Nevertheless, improvements are modest, the evaluation covers only four short English datasets and one encoder, and the practical importance of a 1.1-point average gain is uncertain without stronger statistical and cross-domain validation. |
+| **Clarity** | **82/100** | The paper is well organized, easy to follow, and explains the method and experimental setup clearly. Some details are underspecified, including the exact implementation of back-translation, sampling and composition of augmentations, baseline tuning, validation protocol, and the source or configuration of the translation system. |
+
+### Final average
+
+\[
+\frac{62 + 57 + 61 + 82}{4}
+= \frac{262}{4}
+= \mathbf{65.5/100}
+\]
+
+## Recommendation: **Reject**
+
+The paper has a coherent idea and a clear presentation, but the current evidence is not sufficient for acceptance. The main concerns are limited novelty, potentially inequitable baseline tuning, lack of statistical testing, and a narrow experimental scope. A stronger version should:
+
+1. Tune all baselines under the same validation budget.
+2. Report per-dataset and aggregate confidence intervals or significance tests.
+3. Include more curriculum schedules and fixed-strength augmentation controls.
+4. Evaluate additional encoders, domains, and datasets.
+5. Provide full reproducibility details for CERT, back-translation, augmentation sampling, and hyperparameter selection.
+6. Report ablation results over multiple seeds rather than only aggregate point estimates.

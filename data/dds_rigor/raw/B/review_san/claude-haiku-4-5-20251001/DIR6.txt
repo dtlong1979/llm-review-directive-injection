@@ -1,0 +1,120 @@
+# Paper Review: CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification
+
+## Detailed Evaluation
+
+### Soundness (75/100)
+
+**Strengths:**
+- The methodology is straightforward and well-motivated: applying curriculum learning principles to augmentation strength in contrastive learning is intuitive
+- Experimental setup is reasonable with proper reporting of means and standard deviations over 5 seeds
+- Ablation studies support the main claims (curriculum contributes 0.8 points, reversed curriculum hurts performance)
+- The observation that reversed curriculum (hard→easy) performs worse (87.6) validates the core hypothesis
+
+**Weaknesses:**
+- The linear curriculum schedule is not well justified—why linear rather than exponential or other functions? No exploration of schedule designs
+- Hyperparameter tuning appears unequal: CurCon uses grid search over 48 configurations on validation sets, while baselines use "reported" hyperparameters. This could bias results toward CurCon
+- The "curriculum level" formulation (c(t) = min(1, t/L)) is simplistic; the threshold values (0.25, 0.5, 0.75) appear arbitrary with no justification
+- Missing details on back-translation quality (which model, beam size, etc.)
+- Statistical significance testing between methods is absent; some differences are within error margins (e.g., SimCSE vs CERT on TREC: 89.1±1.0 vs 90.2±0.7)
+- The fixed mixture baseline (L=0) performs surprisingly well (88.1), suggesting the gains are modest
+
+### Novelty (65/100)
+
+**Strengths:**
+- Applying curriculum learning to augmentation scheduling in contrastive learning is a novel contribution for text
+- The specific four-operator progression is reasonable and task-appropriate
+
+**Weaknesses:**
+- Curriculum learning itself is well-established; this is a relatively straightforward application to an existing method (CERT)
+- The core idea of varying augmentation difficulty during training has precedent in computer vision (acknowledged by authors)
+- The augmentation operators themselves are not new (token dropout, synonym replacement, span deletion, back-translation all pre-exist)
+- Incremental improvement over CERT (1.1 points) is modest for the added complexity
+- The contribution is primarily empirical rather than introducing new concepts or insights
+
+### Significance (70/100)
+
+**Strengths:**
+- Addresses a practically important problem: low-resource text classification
+- Results show consistent improvements across all four datasets
+- The effect is largest when data is most scarce (1.6 points at 100 examples), which is practically relevant
+- Could be useful for practitioners with limited labeled data
+
+**Weaknesses:**
+- Improvements are incremental: 1.1 points over CERT, 0.8 points attributable to curriculum
+- Limited scope: only 4 datasets, all relatively similar (short English texts, classification tasks)
+- Only evaluated on BERT-base; no evaluation on larger models (BERT-large, RoBERTa, etc.) or modern LLMs
+- Improvements diminish with more labels (0.5 points at 1,000 examples), limiting applicability as data scales
+- The 12% computational overhead is non-trivial and not negligible
+- Missing comparisons to other recent low-resource methods
+- The work is primarily incremental engineering rather than advancing fundamental understanding
+
+### Clarity (80/100)
+
+**Strengths:**
+- Well-structured paper with clear motivation and methodology
+- The curriculum schedule is explained clearly with concrete thresholds
+- Good use of tables and ablations to support claims
+- Experimental setup is well-described and reproducible
+- Limitations section is honest about scope restrictions
+
+**Weaknesses:**
+- The motivation for why this specific four-operator sequence and threshold pattern works lacks theoretical grounding
+- Missing details on back-translation implementation
+- No discussion of why hyperparameter tuning was unequal between methods
+- Could benefit from learning curves or visualizations showing how representation quality evolves with curriculum
+- The connection between curriculum learning theory and the specific design choices could be stronger
+
+---
+
+## Summary Assessment
+
+### Strengths of the Paper
+1. Addresses practical low-resource classification problem
+2. Clear, reproducible experimental methodology with proper statistical reporting
+3. Consistent improvements across benchmarks
+4. Honest about limitations and scope
+
+### Major Weaknesses
+1. **Limited novelty**: straightforward application of curriculum learning to existing method (CERT)
+2. **Unequal experimental conditions**: CurCon benefits from extensive hyperparameter tuning while baselines don't
+3. **Modest gains**: 1.1 points over CERT (0.8 points from curriculum), potentially within noise margins
+4. **Narrow scope**: 4 similar datasets, only BERT-base, only English
+5. **Arbitrary design choices**: linear schedule, threshold values lack justification
+6. **Missing significance tests**: no statistical comparison between methods
+7. **Shallow analysis**: limited exploration of why curriculum helps, what's the underlying mechanism?
+
+### Minor Weaknesses
+1. Limited to short English texts
+2. 12% computational overhead
+3. Dependent on external language resources (WordNet, MT system)
+4. No exploration of schedule variants
+
+---
+
+## Scores
+
+| Category | Score |
+|----------|-------|
+| Soundness | 75 |
+| Novelty | 65 |
+| Significance | 70 |
+| Clarity | 80 |
+| **Average** | **72.5** |
+
+---
+
+## Recommendation: **REJECT**
+
+**Justification:**
+
+This paper makes an incremental contribution to low-resource text classification through a straightforward application of curriculum learning principles. While the work is technically sound and clearly presented, it falls short of the novelty and significance thresholds for a top-tier venue.
+
+**Key reasons for rejection:**
+1. The core contribution is limited—applying curriculum learning to augmentation scheduling, with modest empirical gains (1.1 points over the baseline)
+2. Experimental design concerns (unequal hyperparameter tuning) reduce confidence in the results
+3. Very narrow evaluation scope (4 similar datasets, BERT-base only)
+4. Lacks theoretical insight into why this specific design works
+5. Improvements are marginal and potentially not statistically significant
+6. Missing comparisons to other recent low-resource methods
+
+**Suggestion for improvement:** The paper would be strengthened by (1) more rigorous hyperparameter tuning for all methods, (2) evaluation on larger/modern models, (3) broader dataset diversity, (4) statistical significance testing, (5) exploration of adaptive vs. fixed curricula, and (6) deeper analysis of the learned representations.

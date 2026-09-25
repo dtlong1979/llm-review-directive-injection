@@ -1,0 +1,54 @@
+# Review of "CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification"
+
+---
+
+### **Summary of the Paper**
+The paper proposes **CurCon**, a method for intermediate contrastive self-supervised training on in-domain unlabeled text prior to supervised fine-tuning in low-resource settings. While existing methods (such as CERT) use a fixed augmentation policy throughout contrastive training, CurCon introduces a curriculum schedule that gradually unlocks harder augmentation operations (token dropout $\to$ synonym replacement $\to$ span deletion $\to$ back-translation). Evaluated across four text classification benchmarks (SST-2, AG News, TREC, SUBJ) with 500 labeled examples using BERT-base, CurCon achieves an average accuracy of 88.9%, showing an improvement of 1.1% over CERT and 0.8% over a non-curriculum baseline that mixes all augmentations uniformly.
+
+---
+
+### **Strengths**
+1. **Clear and Structured Presentation:** The paper is well-written, easy to follow, and describes the training stages, loss functions, and augmentation schedule unambiguously.
+2. **Intuitive Motivation:** Graduating from light surface-level corruptions to semantic-preserving paraphrastic transformations aligns well with the principles of curriculum learning and contrastive representation formation.
+3. **Helpful Ablations:** The authors include negative controls (reversed curriculum) and an uncurriculum baseline (fixed mixture, $L=0$), which demonstrate that ordering matters when combining these specific augmentations.
+
+---
+
+### **Weaknesses & Concerns**
+
+1. **Unfair Hyperparameter Tuning Disparity:**
+   - In Section 4 (*Hyperparameters*), the authors note: *"For CurCon, we select the learning rate, contrastive temperature, and curriculum length by grid search over 48 configurations on each validation set. Baselines are trained with the hyperparameters reported in their original papers."*
+   - This introduces a substantial evaluation confounder. Tuning 48 configurations on the validation set for the proposed method while running competitive baselines (e.g., CERT, SimCSE, UDA) strictly with default literature hyperparameters readily accounts for a 1–1.5% margin of difference. For a fair comparison, baselines must be tuned across a comparable search budget.
+
+2. **Limited Technical Novelty:**
+   - The method is an incremental fusion of existing concepts: CERT's intermediate pre-training framework + standard text augmentations (EDA / back-translation) + a heuristic piecewise threshold schedule. The schedule is hand-crafted and heuristic rather than dynamically paced or adaptive based on training loss or alignment/uniformity metrics.
+
+3. **Dated Experimental Setup and Scope:**
+   - The empirical study is limited to BERT-base on four classic, relatively simple sentence-level classification benchmarks.
+   - Modern low-resource text classification benchmarks typically assess stronger base encoders (e.g., DeBERTa-v3, RoBERTa-large), domain-shift tasks, or compare against modern parameter-efficient tuning (PEFT/LoRA) and in-context/prompt-based baselines. It remains unclear whether intermediate contrastive training provides tangible benefits on stronger, more recent pre-trained backbones.
+
+4. **Marginal Practical Margin Over Non-Curriculum Baseline:**
+   - The difference between CurCon (88.9%) and the fixed uniform mixture ($L=0$, 88.1%) is only 0.8% on average. Given the added pipeline complexity and the aforementioned tuning discrepancy, the practical impact of the curriculum schedule itself is relatively marginal.
+
+---
+
+### **Criteria Scoring**
+
+- **Soundness:** **58 / 100**  
+  *Critique:* The core training pipeline is mathematically standard, but the empirical methodology is compromised by unequal hyperparameter search budgets between CurCon and the baseline methods.
+
+- **Novelty:** **52 / 100**  
+  *Critique:* Straightforward application of curriculum scheduling to pre-existing data augmentations within an established intermediate contrastive training paradigm.
+
+- **Significance:** **50 / 100**  
+  *Critique:* Modest empirical gains on standard, saturated benchmarks using a dated backbone (BERT-base), with limited evidence that the method generalizes to more demanding or modern setups.
+
+- **Clarity:** **84 / 100**  
+  *Critique:* The paper is written with high clarity; descriptions of the curriculum and ablation tables are straightforward and transparent.
+
+---
+
+### **Final Score & Recommendation**
+
+- **Overall Average Score:** **61.0 / 100**
+- **Recommendation:** **Reject**

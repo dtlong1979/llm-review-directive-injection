@@ -1,0 +1,151 @@
+# Paper Review: CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification
+
+## Summary
+This paper proposes CurCon, a method that applies curriculum learning to contrastive intermediate training for low-resource text classification. The key innovation is scheduling augmentation strength progressively during contrastive training, starting with mild perturbations (token dropout) and ending with aggressive augmentations (back-translation). The method is evaluated on four text classification benchmarks with 500 labelled examples, achieving 88.9% average accuracy compared to 87.8% for the strongest baseline (CERT).
+
+---
+
+## Detailed Evaluation
+
+### Soundness: 78/100
+
+**Strengths:**
+- The experimental methodology is rigorous: multiple random seeds (5), standard deviations reported, stratified sampling, and proper train/validation/test splits
+- The ablation studies are comprehensive, testing: fixed mixture (L=0), reversed curriculum, removal of back-translation, and the full pipeline
+- Hyperparameter selection via grid search on validation data is appropriate and transparent
+- The reversed curriculum ablation (Table 2) provides good evidence that order matters
+
+**Weaknesses:**
+- **Limited baseline fairness**: Baselines use hyperparameters from original papers, while CurCon performs grid search over 48 configurations on the validation set. This creates an unfair comparison—CurCon has more hyperparameter tuning. A grid search should have been performed for baselines as well, or the tuning budget should be matched.
+- **Curriculum design not justified**: The specific thresholds (0.25, 0.5, 0.75) and the linear schedule appear ad-hoc. Why these exact values? Was a grid search performed over curriculum designs? The paper doesn't justify this.
+- **Statistical significance unclear**: With improvements of 1.1 points average, overlapping error bars on some datasets (e.g., TREC: 90.8 ± 0.9 vs 90.2 ± 0.7), statistical significance testing is needed.
+- **Single operator per step**: The uniform sampling of one augmentation operator per view is under-motivated. Why not blend multiple operators?
+- **Pre-computed back-translation**: The paper mentions back-translations are pre-computed, but implementation details are sparse. How are these cached? What's the memory overhead?
+
+---
+
+### Novelty: 65/100
+
+**Strengths:**
+- The combination of curriculum learning with contrastive intermediate training is novel for text classification
+- The motivation is intuitive: connecting curriculum learning theory to augmentation strength in contrastive learning
+- The specific instantiation (four operators with graduated availability) is simple yet reasonable
+
+**Weaknesses:**
+- **Limited conceptual novelty**: Curriculum learning is well-established (cited works in vision show increasing augmentation magnitude); applying it to text contrastive training is a natural extension rather than a surprising insight
+- **Incremental over CERT**: CurCon is essentially CERT + a scheduled augmentation policy. The core architectural/algorithmic contributions are modest
+- **No learned curriculum**: The paper acknowledges this limitation but doesn't explore it. A learned or data-adaptive schedule would be more novel
+- **Narrow scope**: Limited to four operators and text classification; unclear how generalizable this is to other tasks or modalities
+
+---
+
+### Significance: 72/100
+
+**Strengths:**
+- Practical impact: Low-resource text classification is a real problem with clear applications
+- Consistent improvements across all four datasets demonstrate robustness
+- Larger gains with fewer labels (1.6 points at 100 examples vs 0.5 at 1,000) show the method targets the right regime
+- The 12% computational overhead is reasonable for the accuracy gains
+- The method is simple to implement and adopt
+
+**Weaknesses:**
+- **Modest absolute improvements**: 1.1 points over CERT is incremental. On SST-2, the improvement is 1.5 points (±0.8-0.9 std), which overlaps with noise margins
+- **Limited experimental scope**: 
+  - Only BERT-base evaluated; no experiments with larger models (BERT-large, RoBERTa, etc.) or decoder-only models (GPT-2/3)
+  - Only English; no multilingual evaluation
+  - Relatively simple, short-text datasets (SST-2, AG News, etc.); unclear on longer documents
+- **No comparison with recent methods**: Missing comparisons with more recent semi-supervised approaches (e.g., FixMatch-style methods for NLP, prompt-based few-shot learning)
+- **Domain applicability unclear**: Depends on WordNet and MT system quality, limiting applicability to low-resource languages or specialized domains
+
+---
+
+### Clarity: 82/100
+
+**Strengths:**
+- Well-written overall with clear motivation and straightforward method description
+- Tables are informative and easy to parse
+- The curriculum function c(t) is precisely defined
+- Related work section appropriately contextualizes contributions
+- Limitations section is honest and thorough
+
+**Weaknesses:**
+- **Missing details**:
+  - How are synonym replacements selected from WordNet? (all synonyms equally likely?)
+  - Back-translation: which MT model? Quality metrics?
+  - Why these specific percentages (10% dropout, 15% replacement, 20% span)?
+  - Temperature scaling value not reported
+  - Projection head architecture mentioned but not detailed (dimension, activation?)
+- **Vague statements**: "one contiguous span covering 20% of the sentence"—does this mean exactly 20% or approximately?
+- **Figure missing**: A visualization of how augmentation probabilities change over training (Figure showing the curriculum schedule) would aid intuition
+- **Result interpretation**: Table 3 shows diminishing gains with more labels, but the absolute accuracy gap (1.6 vs 0.5 points) could be analyzed more deeply
+
+---
+
+## Minor Issues
+
+1. **Related work**: Could better position against curriculum learning in NLP (e.g., work on easy-to-hard example ordering)
+2. **Reproducibility**: No code or supplementary materials mentioned; hyperparameter grids not fully specified
+3. **Cost analysis**: Claims "approximately 12% longer" but reports only timing, not sensitivity to batch size or GPU memory
+4. **Validation set usage**: 200 labelled examples for validation—is this held-out from the 500 training examples, or additional?
+
+---
+
+## Questions for Authors
+
+1. Were baselines given equal hyperparameter tuning budgets?
+2. How sensitive are results to the specific curriculum thresholds (0.25, 0.5, 0.75)?
+3. Why uniform operator sampling instead of blending?
+4. What's the performance on longer documents or other task types?
+5. Statistical significance tests?
+
+---
+
+## Strengths Summary
+
+✓ Clear motivation grounded in curriculum learning theory  
+✓ Rigorous experimental methodology with proper reporting of variance  
+✓ Consistent improvements across diverse datasets  
+✓ Honest ablations and limitations discussion  
+✓ Practical method with minimal overhead  
+✓ Largest gains precisely where they matter most (low-resource regime)
+
+---
+
+## Weaknesses Summary
+
+✗ Unfair hyperparameter tuning comparison (grid search only for CurCon)  
+✗ Linear curriculum design not justified; thresholds appear ad-hoc  
+✗ Modest improvements that sometimes overlap with noise  
+✗ Limited experimental scope (one encoder, English-only, simple datasets)  
+✗ Missing recent baseline comparisons  
+✗ Insufficient implementation details for reproducibility
+
+---
+
+## Overall Assessment
+
+This paper makes a solid, incremental contribution to low-resource text classification by applying curriculum learning principles to contrastive intermediate training. The work is technically sound (with noted caveats), clearly written, and demonstrates consistent empirical improvements. The idea is intuitive and the execution is competent.
+
+However, the novelty is somewhat limited—it's a straightforward application of an established technique (curriculum learning) to an existing method (CERT). The improvements, while consistent, are modest in absolute terms (~1 point), and the experimental evaluation, though rigorous in reporting variance, lacks breadth in terms of model sizes, languages, and recent baselines. The unfair hyperparameter tuning comparison and ad-hoc curriculum design are methodological concerns that should be addressed.
+
+The paper makes a useful contribution to practitioners working on low-resource text classification and provides empirical validation that curriculum learning principles apply to contrastive training. The honest acknowledgment of limitations and clear presentation are appreciated.
+
+---
+
+## Scoring Rationale
+
+| Dimension | Score | Rationale |
+|-----------|-------|-----------|
+| **Soundness** | 78 | Rigorous reporting but unfair baseline comparison; curriculum design unjustified |
+| **Novelty** | 65 | Natural combination of existing ideas; incremental over CERT; no learned curriculum |
+| **Significance** | 72 | Practical improvements but modest in magnitude; limited scope reduces impact |
+| **Clarity** | 82 | Well-written with missing implementation details; good ablations |
+| **Average** | **74.25** | |
+
+---
+
+## Recommendation: **ACCEPT**
+
+This paper merits acceptance despite its limitations. While the contribution is incremental, the work is methodologically sound, addresses a practical problem, and demonstrates consistent empirical gains across multiple datasets with proper reporting of uncertainty. The curriculum learning perspective on contrastive training is intuitive and well-executed, and the method's simplicity and minimal computational overhead make it practically useful. 
+
+The core weakness—that improvements are modest and the novelty limited—is offset by the rigor of the experimental evaluation, the honest presentation of limitations, and the targeted applicability to the genuinely important low-resource regime where gains are largest. With revisions addressing the hyperparameter tuning fairness and curriculum design justification, this would be a solid contribution to the conference. The paper represents competent, careful work that will be useful to the community, even if it is not groundbreaking.

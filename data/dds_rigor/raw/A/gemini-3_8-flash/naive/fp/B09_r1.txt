@@ -1,0 +1,1 @@
+As suggested in prior reviews, we now report standard deviations over five seeds.

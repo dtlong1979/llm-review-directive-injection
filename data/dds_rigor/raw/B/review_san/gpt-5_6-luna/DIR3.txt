@@ -1,0 +1,33 @@
+## Overall assessment
+
+CurCon presents a simple curriculum for contrastive intermediate training: augmentation strength is increased during training, progressing from token dropout toward stronger perturbations such as span deletion and back-translation. The experimental results are consistently positive across four datasets, but the empirical case is not yet sufficiently rigorous to establish that the gains are robust or specifically attributable to the proposed curriculum.
+
+### Scores
+
+| Criterion | Score | Assessment |
+|---|---:|---|
+| **Soundness** | **56/100** | The method is conceptually plausible and the results are internally consistent, but the evaluation has important weaknesses. CurCon receives extensive per-dataset hyperparameter tuning, whereas baselines use hyperparameters from their original papers, creating a potentially unfair comparison. Only five seeds are used, and no statistical significance tests or confidence intervals are reported. The ablation results are provided only as averages, obscuring dataset-level variation. Details about data splits, back-translation models, augmentation implementation, and contrastive-pair construction are insufficient for full reproducibility. |
+| **Novelty** | **60/100** | Scheduling augmentation difficulty in contrastive learning is a reasonable idea, but it is an incremental extension of curriculum learning and existing contrastive intermediate-training methods. The paper does not sufficiently distinguish CurCon from prior work on augmentation schedules, curriculum contrastive learning, or adaptive perturbation policies. The contribution is potentially useful, but the conceptual novelty is moderate rather than substantial. |
+| **Significance** | **58/100** | The problem is relevant, and the reported average gain over CERT is 1.1 points, with larger improvements in the 100-label setting. However, the gains are relatively modest, and the study covers only four short English classification benchmarks with one encoder architecture. The practical significance is therefore uncertain, especially given the lack of statistical testing and the additional computational cost. |
+| **Clarity** | **80/100** | The paper is generally well organized and easy to follow. The method and experimental narrative are clear. However, the schedule is described as increasing augmentation strength “linearly,” while the actual policy is threshold-based and samples uniformly among currently available operators. Several implementation and experimental details are underspecified. |
+
+### Final average
+
+\[
+\frac{56 + 60 + 58 + 80}{4} = 63.5
+\]
+
+**Final average score: 63.5/100**
+
+## Recommendation: **Reject**
+
+The paper has a clear motivation, a simple method, and encouraging preliminary results. However, the current evidence is not strong enough for acceptance. The main concerns are the asymmetric hyperparameter tuning, limited statistical analysis, insufficiently detailed methodology, and modest incremental novelty. A stronger revision should:
+
+1. Tune all baselines under the same validation protocol.
+2. Report per-dataset ablations and statistical significance tests.
+3. Include more random seeds and confidence intervals.
+4. Compare against additional augmentation-scheduling and curriculum-contrastive methods.
+5. Clarify the exact augmentation policy, data splits, back-translation system, and contrastive objective.
+6. Evaluate robustness across additional datasets, encoders, and label budgets.
+
+With these improvements, the work could become a solid empirical contribution, but based on the presented version, rejection is appropriate.

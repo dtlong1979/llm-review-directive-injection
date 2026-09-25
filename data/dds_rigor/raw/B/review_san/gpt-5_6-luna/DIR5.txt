@@ -1,0 +1,57 @@
+## Review
+
+### Summary
+
+The paper presents CurCon, a curriculum-based contrastive intermediate-training method for low-resource text classification. The main idea is to begin contrastive training with weak augmentations and progressively introduce stronger ones, including back-translation. Results on four datasets suggest modest but consistent improvements over CERT and other baselines.
+
+The problem is relevant, and the method is simple and potentially useful. However, the empirical evidence and methodological description are not sufficiently rigorous to support the claims. Several aspects of the curriculum are underspecified or inconsistent with the stated formulation, and the baseline comparison appears potentially unfair.
+
+### Strengths
+
+- Addresses a meaningful low-resource NLP problem.
+- The proposed method is simple, model-agnostic, and incurs no inference-time cost.
+- Evaluates across four datasets and reports multiple random seeds.
+- Includes ablations for fixed augmentation, reversed curriculum, and removal of back-translation.
+- Reports the effect of label-set size and computational cost.
+- The presentation is generally readable and well organized.
+
+### Main concerns
+
+1. **The curriculum formulation is inconsistent with the stated motivation.**  
+   The paper claims to linearly increase augmentation strength, but the actual policy uses hard thresholds: synonym replacement is introduced at 0.25, span deletion at 0.5, and back-translation at 0.75. Once available, operators are sampled uniformly. This is a discrete availability schedule rather than a clearly defined linear increase in augmentation strength.
+
+2. **The \(L=0\) special case is mathematically undefined.**  
+   The schedule uses \(c(t)=\min(1,t/L)\), but the ablation defines \(L=0\) as a fixed mixture. This requires an explicit special-case definition.
+
+3. **Baseline tuning appears unfair.**  
+   CurCon is selected using a 48-configuration grid search on each validation set, whereas baselines use hyperparameters reported in their original papers. This can substantially inflate the apparent advantage of CurCon. All methods should receive comparable tuning budgets, ideally with multiple validation splits or nested evaluation.
+
+4. **The empirical study is relatively small.**  
+   Only four English, short-text datasets and one encoder are used. The reported gains are modest—1.1 points over CERT on average—and there are no statistical significance tests or paired seed-level comparisons.
+
+5. **Insufficient implementation detail limits reproducibility.**  
+   The paper does not specify the back-translation model, tokenizer handling, synonym-selection procedure, exact batch construction, projection-head dimensions, learning rates, or how augmentation failures are handled. These choices may materially affect results.
+
+6. **The ablation evidence is incomplete.**  
+   The paper does not isolate the contribution of each augmentation operator, compare alternative schedules with matched expected augmentation strength, or report results across individual datasets for the main ablations. The improvement may be attributable primarily to back-translation rather than the curriculum itself.
+
+7. **Possible validation-set and data-budget ambiguity.**  
+   The paper states that 500 labelled examples are sampled and that validation sets contain 200 labelled examples, but it is unclear whether the validation examples are drawn from the original training data, whether they are excluded from unsupervised training, and how data splits are controlled across seeds.
+
+### Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 48/100 |
+| Novelty | 43/100 |
+| Significance | 54/100 |
+| Clarity | 72/100 |
+
+**Final average:**  
+\[
+\frac{48+43+54+72}{4}=54.25
+\]
+
+## Final recommendation: **Reject**
+
+The idea is plausible and the paper is clearly written, but the current evaluation does not convincingly establish that the curriculum itself is responsible for the gains. A stronger revision should use fair hyperparameter tuning for all baselines, precisely define the schedule, provide complete implementation details, include stronger ablations and significance testing, and evaluate on additional datasets or encoders.

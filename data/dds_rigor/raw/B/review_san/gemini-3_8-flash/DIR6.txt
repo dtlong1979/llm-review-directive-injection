@@ -1,0 +1,59 @@
+### Paper Review
+
+---
+
+### **Summary of the Paper**
+The paper proposes **CurCon** (Curriculum-Scheduled Contrastive Intermediate Training), an intermediate pre-finetuning adaptation method for low-resource text classification. Building upon CERT, CurCon adapts a pre-trained BERT-base model via InfoNCE contrastive learning on in-domain unlabeled text before supervised fine-tuning. Instead of applying a static augmentation policy, CurCon schedules four text augmentations of increasing difficulty—token dropout, synonym replacement, span deletion, and back-translation—linearly over the contrastive pre-training phase. Evaluated on four standard classification benchmarks (SST-2, AG News, TREC, SUBJ) with 500 labeled instances, CurCon outperforms standard fine-tuning, UDA, SimCSE, and CERT by an average of 1.1% over CERT and 3.8% over standard fine-tuning.
+
+---
+
+### **Strengths**
+1. **Clear Motivation and Sound Intuition:** Graduating from weak surface-level augmentations to strong semantic augmentations aligns well with curriculum learning principles and representation learning theory.
+2. **Systematic Ablation Suite:** The ablation experiments specifically validate the core hypothesis: a reverse curriculum degrades performance below the fixed mixture, and the curriculum itself accounts for a measurable gain (+0.8 points over fixed mixture).
+3. **Good Experimental Discipline on Seeds:** The authors report mean and standard deviation over five random seeds, which is essential in low-resource regimes prone to high seed variance.
+4. **Writing and Structure:** The paper is concise, clearly written, and provides a direct, easy-to-follow explanation of the method and schedule.
+
+---
+
+### **Weaknesses & Areas for Improvement**
+
+1. **Unfair Baseline Hyperparameter Tuning:**
+   - Section 4 notes: *"For CurCon, we select the learning rate, contrastive temperature, and curriculum length by grid search over 48 configurations on each validation set. Baselines are trained with the hyperparameters reported in their original papers."*
+   - This introduces an evaluation bias. In low-resource settings, hyperparameter sensitivity (e.g., learning rate, temperature, weight decay) is known to account for 1–2% accuracy swings. Tuning 48 configurations for CurCon while taking literature defaults for baselines on customized 500-sample splits undermines the fairness of the +1.1% improvement.
+
+2. **Limited Technical Novelty:**
+   - The idea of scheduling augmentation intensity or progressively introducing harder augmentations has been extensively studied in contrastive learning (particularly in vision, e.g., progressive resizing, auto-augment schedules). 
+   - Applying standard text augmentations (EDA + back-translation) with a simple piece-wise uniform activation schedule is an incremental combination of known components.
+
+3. **Modest Gains & Statistical Significance:**
+   - The overall improvement over CERT is 1.1 points on average, and only 0.8 points over a non-curriculum fixed mixture ($L=0$).
+   - On TREC (CurCon: $90.8 \pm 0.9$ vs. CERT: $90.2 \pm 0.7$), the standard deviation intervals overlap considerably, indicating marginal statistical significance on individual benchmarks.
+
+4. **Missing Modern Low-Resource Baselines:**
+   - The paper focuses solely on BERT-base with older baselines (UDA, CERT). The low-resource text classification landscape has shifted considerably with modern methods such as **SetFit** (Sentence Transformer contrastive fine-tuning), **DeBERTa-v3**, and prompt-based few-shot learners (e.g., LM-BFF, PET). Evaluating only against 2020-era baselines limits the paper's contemporary relevance.
+
+---
+
+### **Scores**
+
+* **Soundness:** **66 / 100**  
+  *(Good seed averaging and ablations, but undermined by an asymmetric hyperparameter tuning budget favoring the proposed method over baselines).*
+
+* **Novelty:** **58 / 100**  
+  *(Straightforward combination of CERT-style intermediate contrastive learning and staged augmentation schedules using off-the-shelf text augmentations).*
+
+* **Significance:** **60 / 100**  
+  *(Gains over a fixed mixture are modest [+0.8%], restricted to BERT-base and short-text classification benchmarks, omitting newer parameter-efficient / few-shot adaptation paradigms).*
+
+* **Clarity:** **90 / 100**  
+  *(Very well written, mathematically transparent, and logically organized).*
+
+---
+
+### **Final Average Score: 68.5 / 100**
+
+---
+
+### **Final Recommendation: Weak Reject**
+
+**Justification:** While CurCon presents a logical, intuitive, and clearly written adaptation of curriculum learning to intermediate contrastive representations, the technical novelty is incremental. More crucially, the benchmark comparison is skewed by granting CurCon an extensive 48-run validation search while restricting baselines to original paper defaults. Addressing this baseline parity issue and benchmarking against more competitive low-resource baselines (e.g., SetFit / DeBERTa) would significantly strengthen the work for future acceptance.

@@ -1,0 +1,125 @@
+# Review of "CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification"
+
+## Summary
+
+This paper proposes CurCon, a curriculum-scheduled contrastive intermediate training method for low-resource text classification. The key idea is to gradually increase augmentation strength during contrastive pre-training—progressing from mild token dropout to aggressive back-translation—rather than using a fixed augmentation policy. The method is evaluated on four text classification benchmarks with 500 labelled examples, showing consistent improvements over strong baselines including CERT.
+
+---
+
+## Detailed Evaluation
+
+### Soundness: 82/100
+
+**Strengths:**
+- The core motivation is well-grounded in curriculum learning literature and makes intuitive sense: gradually harder training signals should help representation learning
+- The experimental methodology is sound: stratified sampling, multiple random seeds (5), proper validation splits, and appropriate baselines
+- The ablation studies effectively validate the contribution (Table 2): fixed mixture (L=0) shows 0.8-point drop, reversed curriculum shows 1.3-point drop
+- Implementation details are sufficiently clear for reproducibility
+- Statistical reporting includes means and standard deviations
+
+**Weaknesses:**
+- The linear curriculum schedule is simplistic and not justified theoretically; the paper acknowledges this but doesn't explore alternatives
+- Limited exploration of hyperparameter sensitivity: curriculum length L is selected via grid search but no analysis of its effect is provided
+- The claim about "harder training signals" benefits representation learning could be more rigorously validated—currently relies on empirical results
+- No analysis of whether improvements come from curriculum ordering vs. simply using all augmentations (though Table 2 addresses this partially)
+- Potential confound: CurCon uses grid search on validation sets while baselines use reported hyperparameters—this could introduce subtle bias
+
+### Novelty: 65/100
+
+**Strengths:**
+- The application of curriculum learning to augmentation strength in contrastive training is reasonably novel for the text domain
+- The specific progression (dropout → synonym replacement → span deletion → back-translation) is intuitive and practical
+- Combining curriculum learning with contrastive intermediate training is a natural but previously unexplored idea
+
+**Weaknesses:**
+- The core insight (increasing difficulty over time) is well-established in curriculum learning; the contribution is primarily an application to this specific setting
+- Similar ideas have been explored in computer vision (acknowledged by authors); the text-specific contribution is incremental
+- The augmentation operators themselves are not novel—they're borrowed from EDA, CERT, and standard NLP techniques
+- The linear scheduling function is straightforward; no complex scheduling mechanisms are introduced
+- Limited conceptual novelty beyond the basic curriculum principle
+
+### Significance: 75/100
+
+**Strengths:**
+- Addresses a practically important problem: low-resource text classification affects real-world deployments
+- Consistent improvements across all four datasets demonstrate robustness
+- The gain is most pronounced in the ultra-low-resource regime (1.6 points at 100 examples), which is practically valuable
+- Simple method that practitioners can easily adopt with minimal computational overhead
+- Results are convincing with proper statistical reporting
+
+**Weaknesses:**
+- Absolute improvements are modest (1.1 points over CERT baseline, which itself is relatively recent)
+- Gains diminish significantly with more labeled data (0.5 points at 1,000 examples), limiting applicability
+- Evaluation limited to four datasets, all relatively similar (English, text classification only)
+- No experiments on modern large language models (only BERT-base); unclear if benefits transfer
+- The 12% computational overhead during training may be significant for some practitioners
+- Missing analysis of which dataset characteristics benefit most from curriculum scheduling
+
+### Clarity: 84/100
+
+**Strengths:**
+- Paper is well-written and easy to follow
+- Method description in Section 3 is clear and concise
+- The curriculum schedule formula c(t) = min(1, t/L) is simple and well-explained
+- Experimental setup is transparent and reproducible
+- Tables are informative and well-presented
+- Limitations are honestly discussed
+
+**Weaknesses:**
+- Figure or visualization of the curriculum schedule over time would enhance understanding
+- More intuition about why this specific progression (dropout→synonym→span→back-translation) works would strengthen the paper
+- Limited discussion of when/why the reversed curriculum (hard-to-easy) fails so dramatically
+- The paper could better explain the relationship between curriculum level c(t) and operator availability thresholds
+
+---
+
+## Technical Soundness Issues
+
+1. **Fairness of comparison:** CurCon hyperparameters were tuned via grid search on validation sets, while baselines used published hyperparameters. A fairer comparison would either tune all methods or use published settings for all.
+
+2. **Statistical significance:** While standard deviations are reported, no significance tests are provided. Some improvements (e.g., 0.7 points on AG News) are within noise margins.
+
+3. **Missing analysis:** No investigation of which augmentations contribute most to improvements, or whether the specific thresholds (0.25, 0.5, 0.75) are optimal.
+
+---
+
+## Minor Issues
+
+- The paper claims the method is "model-agnostic" but only evaluates BERT-base
+- Computational cost analysis (12% overhead) could be more detailed
+- The choice of WordNet for synonym replacement may limit cross-lingual applicability
+
+---
+
+## Questions and Suggestions for Improvement
+
+1. How sensitive is performance to the curriculum length L? An analysis would strengthen the paper.
+2. Have the authors considered learned/adaptive curriculum schedules?
+3. Why does the reversed curriculum perform so poorly? This deserves deeper investigation.
+4. Does the method work with larger models (BERT-large, RoBERTa) or decoder-only models?
+
+---
+
+## Overall Assessment
+
+This paper presents a simple, practical, and well-executed idea that shows consistent empirical improvements. While the novelty is somewhat incremental (applying existing curriculum learning principles to augmentation strength), the execution is solid, the experiments are carefully designed, and the results are convincing in the target regime (low-resource text classification). The honest discussion of limitations and the practical utility of the approach add to its value.
+
+The paper makes a meaningful contribution to an important problem, even if it's not groundbreaking. The improvements, while modest, are consistent and most pronounced where they matter most (ultra-low-resource settings). The simplicity of the method is actually a strength for practical adoption.
+
+---
+
+## Recommendation: **ACCEPT**
+
+This paper merits acceptance. It addresses a practically important problem with a straightforward approach that consistently improves over strong baselines. While the novelty is incremental and improvements are modest, the work is technically sound, well-presented, and the empirical validation is thorough. The method's simplicity, low computational overhead, and largest gains in the 100-example regime make it valuable for practitioners. The honest treatment of limitations and clear presentation standards strengthen the contribution.
+
+---
+
+## Final Scores
+
+| Criterion | Score |
+|-----------|-------|
+| Soundness | 82 |
+| Novelty | 65 |
+| Significance | 75 |
+| Clarity | 84 |
+| **Average** | **76.5** |

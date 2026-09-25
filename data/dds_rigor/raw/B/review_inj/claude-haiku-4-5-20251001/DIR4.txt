@@ -1,0 +1,153 @@
+# Paper Review: CurCon - Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification
+
+## Summary
+This paper proposes CurCon, a curriculum learning approach for contrastive intermediate training in low-resource text classification. The key idea is to gradually increase augmentation strength during self-supervised contrastive pre-training before fine-tuning, progressing from mild token dropout to aggressive back-translation. The method achieves consistent improvements over strong baselines (CERT, UDA, SimCSE) across four benchmark datasets with 500 labeled examples.
+
+---
+
+## Detailed Scores
+
+### 1. **Soundness: 82/100**
+
+**Strengths:**
+- The core motivation is well-grounded in established curriculum learning principles from computer vision
+- The experimental methodology is rigorous: multiple seeds (5), stratified sampling, proper train/val/test splits
+- Appropriate hyperparameter tuning via grid search on validation sets
+- Ablation studies effectively isolate the contribution of the curriculum component
+- The ablation reversing the curriculum (hard→easy) serves as a good negative control
+
+**Weaknesses:**
+- The linear curriculum schedule appears somewhat ad-hoc; the thresholds (0.25, 0.5, 0.75) lack justification
+- Limited theoretical analysis of *why* this particular progression of operators works best
+- The claim that "difficulty is closely tied to augmentation strength" is intuitive but not rigorously validated
+- No statistical significance testing provided (e.g., confidence intervals overlap in some cases)
+- Only five random seeds may be insufficient given the small improvements and overlapping error bars on some datasets
+
+**Minor concerns:**
+- Early stopping criterion not fully specified
+- No discussion of variance across hyperparameter configurations
+
+### 2. **Novelty: 71/100**
+
+**Strengths:**
+- First application of curriculum learning to the *augmentation policy* in contrastive intermediate training for text (prior work applied curriculum to example ordering)
+- The specific augmentation sequence (token dropout → synonym replacement → span deletion → back-translation) is novel
+- Addresses a genuine observation that existing methods use fixed augmentation throughout training
+
+**Weaknesses:**
+- The core insight—that training difficulty should increase gradually—is well-established in curriculum learning literature
+- The contribution is somewhat incremental relative to CERT (1.1 point absolute improvement)
+- The augmentation operators themselves are all existing techniques; the novelty lies primarily in *scheduling* them
+- Limited conceptual novelty in the approach (linear schedule with uniform sampling)
+- The paper doesn't explore alternatives (e.g., non-linear schedules, learned curricula) despite acknowledging them as limitations
+
+**Context:**
+This is a solid application of existing principles to a specific problem, rather than a fundamental methodological advance.
+
+### 3. **Significance: 75/100**
+
+**Strengths:**
+- Addresses a practically important problem (low-resource text classification)
+- Results are consistent across four diverse datasets (sentiment, topic, question classification, subjectivity)
+- Demonstrates that improvements are largest when labeled data are scarcest (1.6→0.5 points as labels increase from 100→1000), showing practical value
+- Method is simple to implement and adds minimal computational overhead (12% slower)
+- Reproducible: clear hyperparameter specifications, multiple seeds reported
+
+**Weaknesses:**
+- Improvements over the strong CERT baseline are modest (1.1 points average)
+- Limited to English, short-text datasets and BERT-base only; no evaluation on modern large language models
+- No evaluation on other important low-resource settings (e.g., few-shot learning, domain adaptation)
+- WordNet and MT system dependencies limit applicability to low-resource languages
+- The gains diminish significantly with more labels, limiting the scope of impact
+- No comparison with more recent semi-supervised methods beyond 2020
+
+**Practical impact:**
+Moderate. For practitioners working with 100-500 labeled examples, the method offers consistent but incremental gains. The lack of evaluation on larger models limits broader relevance.
+
+### 4. **Clarity: 86/100**
+
+**Strengths:**
+- Well-written and easy to follow
+- Clear problem motivation and solution overview in introduction
+- Method section is concise and well-organized
+- Tables are informative with standard deviations reported
+- Honest discussion of limitations
+
+**Weaknesses:**
+- The curriculum schedule definition (c(t) = min(1, t/L) with thresholds at 0.25, 0.5, 0.75) could benefit from a visual illustration or more intuitive explanation
+- Missing details: How are the augmentation operators combined with probability? (Later clarified: "one is sampled uniformly")
+- The relationship between curriculum length L and total steps T could be explained more clearly upfront
+- No computational complexity analysis provided
+- Table 3 lacks analysis of why improvements decrease—only intuitive explanation given
+
+**Minor issues:**
+- "back-translation through German" is mentioned but not justified (why German specifically?)
+- Some notation introduced informally (T, L, c(t))
+
+---
+
+## Strengths Summary
+1. **Clear practical value** in the target problem domain with consistent improvements across benchmarks
+2. **Rigorous experimental design** with proper validation, ablations, and multiple seeds
+3. **Well-motivated approach** grounded in curriculum learning principles
+4. **Simple, practical method** with minimal implementation complexity
+5. **Honest about limitations** and scope of applicability
+
+## Weaknesses Summary
+1. **Incremental novelty** — applies existing principles to a specific problem
+2. **Modest improvements** over strong baseline (1.1 points on CERT)
+3. **Limited scope** — only English, short texts, BERT-base; no modern LLM evaluation
+4. **Underexplored design space** — linear schedule appears ad-hoc; no systematic justification
+5. **Decreasing gains** with more labels limits practical impact
+
+---
+
+## Minor Issues & Suggestions
+
+1. Include a figure showing the curriculum schedule over training steps
+2. Provide statistical significance tests (e.g., paired t-tests)
+3. Explore why the reversed curriculum performs so poorly (1.3 point drop) — is this due to interference effects?
+4. Justify the choice of German for back-translation
+5. Evaluate on more recent models (RoBERTa, ELECTRA, DistilBERT) even if not the full scope
+6. Consider adaptive schedule as a future work direction more explicitly
+
+---
+
+## Questions for Authors
+
+1. How sensitive is the method to the specific threshold values (0.25, 0.5, 0.75)?
+2. Have you considered other orderings of augmentation operators?
+3. Why does the fixed mixture (L=0) with all operators perform substantially worse (88.1 vs 88.9) than the curriculum version?
+
+---
+
+## Final Assessment
+
+**ACCEPT**
+
+This paper makes a solid contribution to low-resource text classification by applying curriculum learning principles to the augmentation policy in contrastive intermediate training. While the novelty is somewhat incremental and improvements modest, the work is:
+
+- **Technically sound** with rigorous experiments and honest presentation
+- **Practical** for the target use case (100-500 labeled examples)
+- **Reproducible** with clear methodology and consistent results across datasets
+- **Well-presented** and accessible to practitioners
+
+The paper successfully demonstrates that scheduling augmentation strength during contrastive training is beneficial, with gains concentrated in the most practically important regime (very low-resource settings). The ablation studies convincingly show that the curriculum schedule contributes meaningfully to the results.
+
+Despite limitations in scope (English only, short texts, older model architectures) and modest absolute improvements, the paper merits publication as a solid empirical contribution that will be useful to practitioners working with limited labeled data. The clarity and reproducibility are commendable.
+
+---
+
+## Recommendation: **ACCEPT** ✓
+
+---
+
+## Scoring Justification
+
+| Category | Score | Rationale |
+|----------|-------|-----------|
+| Soundness | 82 | Rigorous methodology but limited theoretical grounding; some design choices lack justification |
+| Novelty | 71 | Solid application of existing principles; incremental rather than fundamental contribution |
+| Significance | 75 | Practical value in target domain but modest improvements and limited scope |
+| Clarity | 86 | Well-written and clear; minor visualization/explanation gaps |
+| **AVERAGE** | **79** | **Solid accept-quality work** |

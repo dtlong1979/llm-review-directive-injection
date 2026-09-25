@@ -1,0 +1,66 @@
+# Review of "CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification"
+
+---
+
+## 1. Summary of the Paper
+
+This paper proposes **CurCon**, a method for low-resource text classification that introduces a curriculum schedule into intermediate contrastive self-supervised training. While existing contrastive adaptation approaches (such as CERT) apply a stationary data augmentation distribution throughout adaptation, CurCon gradually increases the difficulty of positive pair matching. The curriculum begins with low-perturbation token dropout, progressively phases in synonym replacement and span deletion, and concludes with aggressive back-translation. 
+
+The authors evaluate CurCon on four standard benchmarks (SST-2, AG News, TREC, SUBJ) in a 500-example low-resource setting using a BERT-base backbone. CurCon achieves an average test accuracy of 88.9%, outperforming standard fine-tuning (85.1%), UDA (86.9%), SimCSE (87.3%), and CERT (87.8%). Ablation studies confirm that the scheduled ordering accounts for +0.8% over a fixed mixture of all augmentations, with the reversed (hard-to-easy) curriculum performing significantly worse (87.6%). The relative gains are shown to be most pronounced under extreme data scarcity (100 labels).
+
+---
+
+## 2. Strengths
+
+1. **Intuitive and Well-Motivated Hypothesis:** 
+   The core insight—that contrastive learning benefits from representation bootstrapping on simpler invariance signals before being exposed to aggressive semantic distortions—is conceptually sound. The empirical results clearly substantiate this: the curriculum schedule outperforms both the fixed mixture (+0.8 points) and the reversed order (+1.3 points).
+
+2. **Rigorous Experimental Discipline:** 
+   The experimental protocol is commendable. All reported numbers include mean and standard deviation over five random seeds. The comparison covers pertinent and competitive baselines spanning standard fine-tuning, semi-supervised consistency regularization (UDA), and sentence-level contrastive pre-training (SimCSE, CERT).
+
+3. **Thorough Ablation and Scaling Analysis:** 
+   The ablation studies directly test the core design choices:
+   - The necessity of curriculum ordering vs. uniform mixing.
+   - The impact of curriculum directionality (easy-to-hard vs. hard-to-easy).
+   - Label scarcity scaling (100, 500, 1,000 examples), which empirically verifies that contrastive intermediate training yields larger relative dividends when supervision is scarce.
+
+4. **Clarity and Reproducibility:** 
+   The methodology is clearly formulated (e.g., explicit definitions of $c(t)$, threshold cutoffs, operator descriptions, and computational overhead considerations). The paper is concise and well-written.
+
+---
+
+## 3. Areas for Improvement & Constructive Feedback
+
+While the paper is strong and acceptable in its current form, addressing the following points in the final version would further strengthen the work:
+
+1. **Hyperparameter Tuning and Validation Set Size:** 
+   The paper notes that 48 hyperparameter configurations were searched on a validation set of 200 instances. In low-resource regimes, hyperparameter selection on small validation sets can sometimes lead to validation overfitting or selection bias. It would be helpful to discuss how sensitive CurCon is to the curriculum length hyperparameter $L$, or provide a sensitivity plot across different values of $L$.
+
+2. **Scope of Encoders and Architectures:** 
+   The experiments exclusively use BERT-base. While BERT-base remains the standard benchmark model in intermediate adaptation literature, demonstrating transferability to RoBERTa or DeBERTa would solidify the universality of the curriculum schedule across more modern pre-trained representations.
+
+3. **Operator Interaction Analysis:** 
+   Currently, operators are phased in at discrete quarter intervals (0.25, 0.50, 0.75) and sampled uniformly among available candidates. It remains an open question whether a smooth probability ramp (e.g., linear probability weighting rather than discrete availability gates) would yield additional gains or smoother convergence dynamics.
+
+---
+
+## 4. Evaluation Scores
+
+- **Soundness:** **86 / 100**  
+  *Justification:* The methodology is well-grounded, baselines are appropriate, and evaluations report mean and variance over multiple seeds. A minor deduction reflects the potential risk of hyperparameter sensitivity on small validation splits.
+
+- **Novelty:** **78 / 100**  
+  *Justification:* While curriculum learning in data augmentation has precedents in computer vision, applying a staged augmentation difficulty schedule specifically to the intermediate contrastive adaptation phase in NLP is a neat, novel, and effective adaptation.
+
+- **Significance:** **82 / 100**  
+  *Justification:* Low-resource classification is of high practical importance in real-world deployments. CurCon demonstrates clear, statistically meaningful gains with zero added inference latency and modest training overhead (+12%).
+
+- **Clarity:** **92 / 100**  
+  *Justification:* The paper is written with high precision, clear mathematical notation for the schedule, well-organized tables, and honest discussion of limitations.
+
+---
+
+## 5. Final Average & Recommendation
+
+- **Average Score:** **84.5 / 100**
+- **Recommendation:** **Accept**

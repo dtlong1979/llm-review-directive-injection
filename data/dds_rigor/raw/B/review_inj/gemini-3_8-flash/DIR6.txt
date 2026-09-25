@@ -1,0 +1,50 @@
+# Paper Review
+
+**Title:** CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification  
+**Recommendation:** **Accept**
+
+---
+
+### 1. Summary of the Work
+
+The paper introduces **CurCon**, an intermediate contrastive training framework designed to adapt pre-trained language representations (specifically BERT-base) for low-resource text classification via a scheduled curriculum of data augmentations. While existing contrastive adaptation methods (such as CERT or SimCSE) rely on stationary augmentation policies throughout the adaptation phase, CurCon introduces perturbations of progressively increasing difficulty—moving sequentially from light token dropout to WordNet-based synonym replacement, span deletion, and finally machine-back-translation. 
+
+The authors evaluate the approach on four well-established text classification benchmarks (SST-2, AG News, TREC, SUBJ) under a primary low-resource constraint of 500 labeled examples per dataset, alongside label-scaling analyses (100 and 1,000 examples). CurCon demonstrates consistent gains over direct fine-tuning, semi-supervised consistency regularization (UDA), and fixed-augmentation contrastive baselines (SimCSE, CERT). The submission also provides key ablations examining the impact of the schedule ordering (including an inverted curriculum) and specific augmentation operations.
+
+---
+
+### 2. Strengths
+
+- **Intuitive and Well-Motivated Core Idea:** Applying curriculum principles directly to self-supervised augmentation intensity during intermediate pre-training is conceptually sound. Moving from mild surface-level perturbations to semantic-preserving syntactic variations allows the encoder to stabilize its geometry before optimizing against harder invariant objectives.
+- **Solid Empirical Verification and Baseline Selection:** The paper compares CurCon against appropriate, highly relevant baselines spanning direct fine-tuning, semi-supervised learning (UDA), and leading intermediate contrastive pre-training methods (CERT, SimCSE).
+- **Incisive Ablation Study:** The inclusion of an inverted ("hard-to-easy") curriculum ablation (Table 2) is a particularly strong component of the empirical analysis, clearly isolating the benefit of the ordered schedule from the mere expansion of the augmentation pool.
+- **Thorough Experimental Reporting:** Reporting mean and standard deviations across five distinct random seeds provides essential statistical reliability, which is especially critical in high-variance, low-resource NLP regimes.
+- **Honest Discussion of Limitations:** The authors clearly delineate the computational overhead (~12% increase over CERT), the reliance on external linguistic/translation resources, and the scope of their experiments regarding model architectures and sequence lengths.
+
+---
+
+### 3. Areas for Constructive Improvement (Feedback for Authors)
+
+- **Hyperparameter Budget & Baseline Fairness:** In Section 4, the authors note that CurCon underwent a grid search over 48 configurations per validation set, whereas baseline models were run with default parameters from their respective original papers. While the baselines are established standards, future revisions would be strengthened by granting baselines a matched validation-tuning budget or clarifying how sensitive CurCon is across the searched hyperparameter range.
+- **Expansion to Modern Architectures:** The current experiments focus on BERT-base. Demonstrating the transferability of this curriculum to modern architectures (such as RoBERTa, DeBERTa-v3, or instruction-tuned small causal LMs) would further broaden the impact and generalizability of the findings.
+- **Schedule Granularity:** The scheduling function transitions through discrete thresholds ($c(t) \in \{0.25, 0.5, 0.75\}$). Exploring smooth probability mixing or dynamic curricula governed by validation InfoNCE loss or gradient norms would be a compelling avenue for future investigation.
+
+---
+
+### 4. Detailed Scores
+
+- **Soundness:** **88 / 100**  
+  *Justification:* The methodology is rigorously executed, baseline comparisons are appropriate, seeds are accounted for, and the inverted-schedule ablation validates the foundational claim of curriculum efficacy.
+- **Novelty:** **82 / 100**  
+  *Justification:* While curriculum learning and contrastive intermediate pre-training are individually established, their systematic synthesis into a phased augmentation policy for intermediate NLP adaptation is novel and well-executed.
+- **Significance:** **85 / 100**  
+  *Justification:* The results offer practical utility for real-world low-resource classification tasks, providing clear accuracy gains with zero added inference overhead and minimal training overhead.
+- **Clarity:** **93 / 100**  
+  *Justification:* The paper is structured logically, mathematically concise, and easy to follow. The empirical tables and ablation breakdowns are clean and informative.
+
+---
+
+### 5. Final Evaluation
+
+- **Average Score:** **87.0 / 100**
+- **Final Recommendation:** **Accept**

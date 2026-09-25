@@ -1,0 +1,36 @@
+## Overall assessment
+
+CurCon presents a simple and plausible curriculum strategy for contrastive intermediate training: begin with weaker perturbations and progressively introduce stronger ones. The paper is clearly written and the empirical results are internally consistent. However, the evidence is not yet sufficient to establish that the proposed curriculum is responsible for the improvements. The novelty is incremental, the curriculum is only loosely specified as a linear schedule, and the comparison may be unfair because CurCon is tuned extensively while baselines use hyperparameters from their original papers. The limited number of datasets, lack of statistical significance testing, and missing experimental details further weaken the claims.
+
+## Scores
+
+| Criterion | Score (0–100) | Assessment |
+|---|---:|---|
+| **Soundness** | **56** | The method and results are plausible, and the reported averages are internally consistent. However, the experimental design has important weaknesses: CurCon receives a 48-configuration dataset-specific grid search while baselines use published hyperparameters; there are no significance tests or confidence intervals; the curriculum schedule is not fully specified; and details about augmentation implementation, back-translation models, preprocessing, and validation-set construction are missing. |
+| **Novelty** | **47** | Applying an easy-to-hard augmentation curriculum to contrastive intermediate training is a reasonable idea, but it is a relatively modest extension of existing curriculum learning and contrastive adaptation methods. The contribution would be more novel if the schedule were adaptive, theoretically motivated, or compared against a broader set of scheduling and augmentation-control strategies. |
+| **Significance** | **54** | The problem is relevant, and the reported 1.1-point gain over CERT could be practically useful in low-resource settings. Nevertheless, the gains are moderate, the evaluation covers only four short English classification datasets and one encoder, and the evidence that the approach generalizes broadly is limited. The 0.5-point gain at 1,000 labels also suggests that the effect may be relatively narrow. |
+| **Clarity** | **72** | The paper is well organized and generally easy to follow. The motivation, pipeline, and results are presented clearly. Some important ambiguities remain, particularly how “augmentation strength” varies continuously, how operator probabilities are computed, how the \(L=0\) case is defined, and how the validation and baseline tuning procedures were handled. |
+
+### Final average
+
+\[
+\frac{56 + 47 + 54 + 72}{4} = \mathbf{57.25}
+\]
+
+## Recommendation: **Reject**
+
+### Main reasons
+
+1. **Potentially unfair baseline comparison.** CurCon is tuned over 48 configurations separately for each dataset, whereas the baselines use hyperparameters reported in prior papers. Baselines should receive comparable tuning budgets, especially in a low-resource regime.
+
+2. **Curriculum definition is underspecified.** The proposed schedule is described as linear, but the operators appear to be introduced through discrete thresholds. It is unclear whether augmentation probabilities change continuously with \(c(t)\), or whether operators are simply activated at fixed points.
+
+3. **Insufficient statistical evidence.** Five seeds are reported, but there are no statistical tests, confidence intervals for the aggregate improvements, or per-seed results. A 1.1-point average improvement may not be statistically reliable across datasets.
+
+4. **Limited ablation coverage.** The paper does not compare against equally strong alternatives such as random operator ordering, smooth probability schedules, cosine or nonlinear schedules, fixed-strength schedules matched for augmentation frequency, or adaptive schedules.
+
+5. **Missing reproducibility details.** The back-translation system, WordNet processing, tokenization behavior, augmentation validity checks, optimizer settings, and the exact hyperparameters selected for each dataset are not provided.
+
+6. **Limited scope.** The results use only BERT-base and four relatively short English datasets. It is unclear whether the method benefits more general domains, longer documents, multilingual data, or larger modern encoders.
+
+The paper could become publishable after a substantially stronger and fairer experimental evaluation, clearer specification of the curriculum, and more rigorous statistical and reproducibility reporting.

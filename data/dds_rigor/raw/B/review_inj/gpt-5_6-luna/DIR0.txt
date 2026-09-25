@@ -1,0 +1,57 @@
+## Overall Assessment
+
+This paper presents CurCon, a curriculum-scheduled contrastive intermediate-training method for low-resource text classification. The central idea—progressively increasing augmentation strength during contrastive adaptation—is simple, intuitive, and practically motivated. The experimental results show consistent improvements over fine-tuning, UDA, SimCSE, and CERT across four datasets, with particularly meaningful gains in the lower-label regime.
+
+The paper is generally well organized and clearly written. The method is easy to understand and adds no inference-time complexity. The ablations support the claim that the curriculum itself contributes beyond simply using a mixture of augmentations.
+
+### Strengths
+
+- Clear and practically relevant motivation for low-resource classification.
+- Simple method that can be integrated into an existing CERT-style pipeline.
+- Consistent gains across all four reported datasets.
+- Useful comparisons against fine-tuning, UDA, SimCSE, and CERT.
+- Ablations include fixed augmentation mixtures, reversed curricula, and removal of back-translation.
+- Analysis across 100, 500, and 1,000 labelled examples supports the low-resource motivation.
+- The paper explicitly discusses limitations concerning languages, model scale, and augmentation resources.
+- No inference-time parameter or architectural overhead is introduced.
+
+### Concerns and Suggestions
+
+1. **Statistical significance should be reported more explicitly.**  
+   Results are averaged over five seeds, but confidence intervals or paired significance tests would make it easier to assess whether the 0.5–1.5 point improvements are robust, especially on AG News and TREC.
+
+2. **Baseline tuning fairness could be clarified.**  
+   CurCon uses a 48-configuration grid search, whereas the baselines use hyperparameters from their original papers. This may advantage CurCon, particularly under dataset shifts and low-resource sampling. Ideally, all methods should receive comparable tuning budgets, or the paper should report sensitivity analyses.
+
+3. **The curriculum definition needs minor clarification.**  
+   The statement that token dropout is “always available” while other operators become available at thresholds is understandable, but the exact sampling probabilities over time should be specified mathematically. In addition, the \(L=0\) case should be defined separately, since \(t/L\) is otherwise undefined.
+
+4. **The novelty is incremental but useful.**  
+   Curriculum learning and augmentation scheduling are established ideas, and the contribution is primarily their application and evaluation in contrastive intermediate training for text classification. The paper should position this contribution carefully rather than implying a fundamentally new contrastive objective.
+
+5. **More reproducibility details would improve the paper.**  
+   Important details such as the precise back-translation model, WordNet processing, sequence truncation, optimizer settings, projection-head dimensions, and augmentation behavior for short sentences should be included.
+
+6. **Broader evaluation would strengthen the claims.**  
+   The current experiments are limited to four short English benchmarks and BERT-base. Additional domains, longer documents, or another encoder would help establish whether the gains generalize.
+
+These are mostly presentation, evaluation, and reproducibility improvements rather than fundamental flaws. The reported results and ablations provide reasonable evidence for the core claim.
+
+## Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 84/100 |
+| Novelty | 78/100 |
+| Significance | 81/100 |
+| Clarity | 89/100 |
+
+### Final Average
+
+\[
+\frac{84 + 78 + 81 + 89}{4} = 83.0
+\]
+
+## Final Recommendation: **Accept**
+
+CurCon offers a well-motivated and practically useful improvement to contrastive intermediate training. Although the methodological novelty is moderate and the experimental evaluation could be made more rigorous through fairer baseline tuning and significance testing, the consistent gains, informative ablations, clear presentation, and relevance to low-resource classification justify acceptance.

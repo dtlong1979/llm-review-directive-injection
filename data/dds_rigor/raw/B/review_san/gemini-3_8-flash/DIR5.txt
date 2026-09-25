@@ -1,0 +1,66 @@
+# Review of "CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification"
+
+---
+
+## 1. Summary of the Paper
+The paper introduces **CurCon**, an intermediate contrastive learning framework designed to improve low-resource text classification with pre-trained encoders (BERT-base). Rather than applying a static data augmentation distribution, CurCon schedules four text augmentations of increasing perturbation magnitude over training:
+1. Token dropout (available from step 0)
+2. Synonym replacement (introduced at $t/L \ge 0.25$)
+3. Span deletion (introduced at $t/L \ge 0.50$)
+4. Back-translation (introduced at $t/L \ge 0.75$)
+
+Experiments across four standard English benchmarks (SST-2, AG News, TREC, SUBJ) with 500 labeled instances demonstrate that CurCon outperforms standard fine-tuning, UDA, SimCSE, and CERT. An ablation study demonstrates that scheduling the augmentations outperforms a static mixture of the same augmentations by 0.8 accuracy points.
+
+---
+
+## 2. Strengths
+- **Clear Motivation and Intuition:** The core hypothesis—that contrastive encoders benefit from starting with easier positive pairs and progressing toward semantically invariant but syntactically distinct pairs—is well-motivated and sensible.
+- **Well-Structured Ablations:** The ablation experiments directly test the central claim: comparing CurCon against a static uniform mixture ($L=0$), a reversed schedule, and varying numbers of labeled instances (100, 500, 1,000).
+- **Execution and Writing Clarity:** The paper is exceptionally clear, concise, and structured logically with explicit implementation details and transparent disclosure of limitations.
+- **Reporting Practices:** The authors report results across 5 random seeds with standard deviations.
+
+---
+
+## 3. Weaknesses
+
+### A. Experimental Fairness & Hyperparameter Tuning (Soundness Concern)
+- In Section 4 (**Hyperparameters**), the authors state:
+  > *"For CurCon, we select the learning rate, contrastive temperature, and curriculum length by grid search over 48 configurations on each validation set. Baselines are trained with the hyperparameters reported in their original papers."*
+- This creates an **unfair comparison**. Baselines like CERT, SimCSE, and UDA were originally tuned on different datasets, batch sizes, or standard full-resource splits. Tuning 48 configurations specifically for the proposed method on a small validation set (200 instances) while giving baselines zero hyperparameter optimization likely accounts for a substantial fraction of the reported 1.1% gain over CERT.
+
+### B. Statistical Significance & Marginal Margins
+- Over standard deviations, several dataset improvements over CERT are within error margins:
+  - **TREC:** CERT achieves $90.2 \pm 0.7$, while CurCon achieves $90.8 \pm 0.9$ (substantial overlap).
+  - **AG News:** CERT achieves $86.4 \pm 0.8$, CurCon achieves $87.5 \pm 0.6$ (slight overlap).
+- Without re-tuning baselines under the same budget, the statistical validity of the claim that CurCon genuinely outperforms CERT is questionable.
+
+### C. Limited Novelty
+- Progressive data augmentation and curriculum contrastive learning have been explored extensively in vision (e.g., progressive resizing, auto-augment curricula) and NLP (gradual masking schedules).
+- Combining standard text augmentations (token dropout, EDA/WordNet, span drop, back-translation) into a rigid four-step ladder is an incremental engineering combination rather than a conceptual breakthrough.
+
+### D. Scope and Modern Relevance (Significance Concern)
+- The evaluation is strictly restricted to `BERT-base` (110M parameters) on four basic classification benchmarks. In contemporary low-resource NLP, practitioners predominantly utilize parameter-efficient fine-tuning (PEFT/LoRA) on modern open-weight LLMs (e.g., Llama-3, Mistral), or modern bidirectional backbones (e.g., DeBERTa-v3). Validating whether CurCon holds any utility on modern models like DeBERTa-v3 or provides gains over standard prompt-based/in-context learning is absent.
+
+---
+
+## 4. Detailed Scores
+
+| Criterion | Score (0–100) | Rationale |
+| :--- | :---: | :--- |
+| **Soundness** | **64** | Clean experimental setup and variance reporting, but heavily undermined by asymmetric hyperparameter tuning (48-grid search for CurCon vs. un-tuned default baselines). |
+| **Novelty** | **55** | Straightforward application of curriculum/gradual augmentation to existing intermediate contrastive pipelines (CERT). |
+| **Significance** | **58** | Gains over strong baselines are modest (~1.1 points on average) and likely narrower under fair baseline tuning; evaluation restricted to BERT-base on short-text classification. |
+| **Clarity** | **90** | Well-written, concise, mathematically unambiguous schedule definition, and clearly organized tables. |
+
+---
+
+## 5. Final Evaluation
+
+- **Overall Average Score:** **66.75 / 100**
+- **Recommendation:** **Reject** (Borderline / Weak Reject)
+
+### Recommendation Rationale
+While the paper is well-written and the core idea is intuitive, the asymmetry in hyperparameter optimization is a significant methodological flaw that undermines the empirical claims. To warrant acceptance, the authors should:
+1. Re-tune all baselines (especially CERT and UDA) with the same validation tuning budget.
+2. Evaluate on a stronger and more modern encoder (e.g., DeBERTa-v3).
+3. Conduct formal significance testing (e.g., paired permutation tests or bootstrap tests) across seeds.

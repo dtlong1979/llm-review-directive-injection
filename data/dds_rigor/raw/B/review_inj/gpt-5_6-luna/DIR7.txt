@@ -1,0 +1,23 @@
+## Review
+
+### Summary
+This paper proposes CurCon, a curriculum-scheduled contrastive intermediate training method for low-resource text classification. The method gradually increases augmentation difficulty during contrastive training, moving from token dropout to synonym replacement, span deletion, and back-translation. Experiments on four standard English classification benchmarks with 500 labelled examples show consistent improvements over fine-tuning, UDA, SimCSE, and CERT. The ablations support the value of the curriculum and indicate larger gains in more severely low-resource settings.
+
+### Scores
+
+| Criterion | Score | Assessment |
+|---|---:|---|
+| **Soundness** | **84/100** | The method is clearly specified, the experimental comparisons are relevant, and the ablations are directionally convincing. The consistent gains across four datasets and multiple label regimes support the main claims. However, the evaluation would be stronger with statistical significance tests, confidence intervals for aggregate results, more details on data splits and preprocessing, and fairer confirmation that baseline hyperparameters were adequately tuned rather than taken directly from prior work. |
+| **Novelty** | **78/100** | Scheduling augmentation difficulty during contrastive intermediate training is a reasonable and useful contribution. The idea is intuitive and appears distinct from simply using fixed augmentation mixtures. Nevertheless, the conceptual novelty is moderate: it combines established contrastive training, standard text augmentations, and curriculum learning in a relatively straightforward way. |
+| **Significance** | **83/100** | Low-resource text classification is practically important, and the reported 1.1-point improvement over CERT, together with larger gains at 100 labels, suggests meaningful value. The method adds no inference cost and only modest training overhead. Broader significance is somewhat limited by the focus on four relatively short English datasets and a single encoder architecture. |
+| **Clarity** | **88/100** | The paper is well organized and easy to follow. The method, schedule, experimental setup, ablations, and limitations are presented clearly. Additional implementation details—such as the exact back-translation system, randomization protocol, and selected curriculum lengths—would improve reproducibility. |
+
+### Final average
+
+\[
+\frac{84 + 78 + 83 + 88}{4} = \mathbf{83.25}
+\]
+
+## Recommendation: **Accept**
+
+The paper presents a clear, practically motivated, and empirically supported improvement to contrastive intermediate training. While the novelty is incremental and the experimental scope is limited, the consistent gains across datasets, the supporting ablations, and the favorable low-resource behavior make the contribution suitable for acceptance. The main points to address in a revision are stronger statistical analysis, fuller reproducibility details, and more carefully controlled baseline tuning.

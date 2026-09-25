@@ -1,0 +1,42 @@
+## Overall Assessment
+
+This paper presents CurCon, a curriculum-based contrastive intermediate-training method for low-resource text classification. The core idea—progressively increasing augmentation strength during contrastive adaptation—is intuitive, easy to implement, and supported by experiments on four benchmarks. The reported improvements over CERT and other baselines are consistent across datasets, and the ablations provide evidence that the curriculum schedule contributes beyond contrastive training alone.
+
+The manuscript is generally well organized and clearly written. While the experimental evaluation could be strengthened in several ways, the method is sufficiently motivated and empirically supported for acceptance.
+
+## Scores
+
+| Criterion | Score (0–100) | Assessment |
+|---|---:|---|
+| **Soundness** | **82** | The method is technically coherent, the experimental comparisons are relevant, and the ablations support the claimed contribution. However, baseline hyperparameters are taken from original papers rather than tuned under the same protocol, and statistical significance testing is not reported. Details about data splits, augmentation implementation, and whether all baselines use identical unlabeled data could also be clarified. |
+| **Novelty** | **73** | Curriculum learning and contrastive intermediate training are established ideas, but applying a scheduled augmentation-strength curriculum specifically to contrastive intermediate training for low-resource classification is a reasonable and useful combination. The novelty is incremental rather than foundational. |
+| **Significance** | **78** | The problem is practically important, and the method yields consistent improvements, including a 1.1-point average gain over CERT and larger gains in the 100-label setting. The impact is somewhat limited by evaluation on only four relatively standard English datasets and a single encoder family. |
+| **Clarity** | **89** | The paper is well structured, readable, and provides a clear description of the pipeline, schedule, experiments, ablations, and limitations. Some implementation details—such as exact augmentation probabilities, preprocessing, validation-set construction, and reproducibility information—could be made more precise. |
+
+### Final Average
+
+\[
+\frac{82 + 73 + 78 + 89}{4} = \mathbf{80.5}
+\]
+
+## Strengths
+
+- Addresses an important low-resource classification problem.
+- The proposed curriculum is simple, intuitive, and adds no inference-time cost.
+- Improvements are consistent across all four datasets.
+- Includes meaningful ablations comparing fixed, reversed, and reduced augmentation curricula.
+- Evaluates performance at multiple label budgets, supporting the low-resource motivation.
+- The limitations are appropriately acknowledged.
+
+## Weaknesses and Suggested Revisions
+
+1. **Fairness of baseline tuning:** Baselines use hyperparameters from their original papers, whereas CurCon is selected through a dataset-specific grid search. Tuning all methods under a common validation protocol would make the comparison stronger.
+2. **Statistical testing:** The paper reports standard deviations over five seeds but does not test whether the improvements over CERT are statistically significant.
+3. **Reproducibility:** The exact sampling probabilities, synonym-replacement procedure, back-translation model, randomization details, and selected curriculum lengths should be reported.
+4. **Unlabeled-data protocol:** It should be explicitly stated whether the 500 labeled examples are removed from the pool used during contrastive training and whether all methods access exactly the same unlabeled data.
+5. **Scope of evaluation:** Results are limited to short English classification datasets and BERT-base. Broader models and domains would improve the claims, although this is reasonable for the current study.
+6. **Compute and sensitivity analysis:** A more detailed analysis of curriculum-length sensitivity and computational cost would help establish robustness.
+
+## Final Recommendation: **Accept**
+
+The paper offers a clear, practically motivated, and empirically supported contribution. Although the novelty is incremental and the experimental protocol would benefit from tighter baseline control and more statistical analysis, the consistent gains, useful ablations, and relevance to low-resource classification justify acceptance.

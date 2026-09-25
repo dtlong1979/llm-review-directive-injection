@@ -1,0 +1,48 @@
+# Peer Review
+
+**Paper Title:** CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification  
+
+---
+
+### 1. Summary of the Paper
+The paper proposes **CurCon** (Curriculum-Scheduled Contrastive Intermediate Training), an intermediate self-supervised training framework designed to enhance encoder representations before fine-tuning on low-resource text classification tasks. Recognizing that standard intermediate contrastive approaches (e.g., CERT) use static augmentation distributions, CurCon introduces an intuitive curriculum schedule that progressively shifts the augmentation difficulty from mild token-level perturbations (token dropout, synonym replacement) to stronger semantic alterations (span deletion, back-translation). Across four benchmark datasets (SST-2, AG News, TREC, SUBJ) with 500 labeled instances, CurCon consistently outperforms competitive baselines (standard fine-tuning, UDA, SimCSE, CERT). Comprehensive ablation studies support the necessity of the curriculum ordering and illustrate how benefits scale under varying label scarcity.
+
+---
+
+### 2. Strengths
+- **Principled Motivation & Intuitive Design:** Grounding contrastive intermediate adaptation in curriculum learning principles is well-justified. Progressively presenting harder positive pairs helps prevent early representational collapse or unstable alignment while encouraging deep semantic invariance in later training phases.
+- **Solid Empirical Results:** CurCon yields consistent improvements across all evaluated datasets over established baselines, achieving an average gain of +1.1 points over the strong CERT baseline and +3.8 points over standard fine-tuning under identical data conditions.
+- **Insightful Ablations:** The ablation analysis (Table 2) validates key components: the curriculum scheduling accounts for +0.8 points over a uniform mixture ($L=0$), and the reversed curriculum (hard-to-easy) underperforms significantly, empirically confirming the easy-to-hard hypothesis. Table 3 nicely illustrates the increased utility of CurCon when label counts decrease to 100 examples.
+- **Practical & Reproducible:** The method incurs no extra inference latency and modest training overhead (~12% relative to CERT), making it practical for real-world deployment. The experimental parameters and design are stated clearly.
+
+---
+
+### 3. Constructive Feedback & Areas for Future Extension
+While the paper is technically sound and meets the threshold for acceptance, the authors could further enhance the work by considering the following points:
+1. **Model Diversity:** The current empirical study relies entirely on `BERT-base`. Evaluating on more modern or varied encoder architectures (e.g., RoBERTa, DeBERTa-v3) or larger parameter scales would further strengthen the generalizability claims.
+2. **Curriculum Dynamics:** The curriculum is currently parameterized via fixed linear thresholds ($0.25, 0.5, 0.75$). Providing an analysis of sensitivity to curriculum length $L$ or discussing adaptive/loss-driven scheduling mechanisms would provide richer insights for practitioners.
+3. **Task Variety:** Expanding the benchmark suite beyond sentence-level classification (e.g., document-level classification or natural language inference) would highlight how the curriculum behaves with longer contexts.
+
+---
+
+### 4. Criterion Scores (0–100)
+
+- **Soundness:** **88 / 100**  
+  *Justification:* The methodology is robustly formulated, evaluations are averaged across five random seeds with standard deviations reported, and control ablations (including a reversed curriculum and label count scaling) isolate the curriculum effect cleanly.
+
+- **Novelty:** **80 / 100**  
+  *Justification:* While curriculum learning and contrastive intermediate adaptation (CERT) are known paradigms, combining them systematically via staged augmentation policies for low-resource text adaptation is an elegant and effective contribution.
+
+- **Significance:** **84 / 100**  
+  *Justification:* Low-resource adaptation is a pervasive challenge in real-world NLP. CurCon presents a practical, drop-in adaptation strategy with demonstrable gains in few-label regimes without adding inference overhead.
+
+- **Clarity:** **92 / 100**  
+  *Justification:* The paper is concise, well-structured, and easy to read. The method description, schedule formulation, and ablation breakdowns are transparent.
+
+---
+
+### 5. Final Evaluation
+
+$$\text{Final Average Score} = \frac{88 + 80 + 84 + 92}{4} = \mathbf{86.0 / 100}$$
+
+**Final Recommendation:** **Accept**

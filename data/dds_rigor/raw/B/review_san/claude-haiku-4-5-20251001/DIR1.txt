@@ -1,0 +1,125 @@
+# Paper Review: CurCon
+
+## Summary
+This paper proposes CurCon, a curriculum-learning approach for contrastive intermediate training in low-resource text classification. The key idea is to gradually increase augmentation strength during contrastive pre-training rather than using a fixed augmentation policy. The method is evaluated on four benchmarks with 500 labeled examples, showing improvements over BERT fine-tuning, UDA, SimCSE, and CERT.
+
+---
+
+## Detailed Scores
+
+### 1. **Soundness: 75/100**
+
+**Strengths:**
+- Experimental design is reasonable with stratified sampling, multiple random seeds (5), and proper train/validation/test splits
+- Ablation studies are included and show the contribution of each component
+- The comparison to a reversed curriculum is a good negative control
+- Results are reported with standard deviations
+
+**Weaknesses:**
+- Limited statistical significance testing. With small improvements (1.1 points average) and standard deviations around 0.6-1.4, some improvements may not be statistically significant
+- Hyperparameter selection is concerning: CurCon uses grid search over 48 configurations per validation set, while baselines use reported hyperparameters. This introduces potential bias favoring CurCon
+- The curriculum schedule is linear and hand-designed; no principled justification for the specific thresholds (0.25, 0.5, 0.75)
+- Back-translated views are pre-computed, but it's unclear if this is done consistently across all methods
+- Limited analysis of why the curriculum helps (e.g., no visualization of representation quality over training)
+
+### 2. **Novelty: 65/100**
+
+**Strengths:**
+- The application of curriculum learning to augmentation strength in contrastive training for text is relatively novel
+- The specific augmentation schedule (token dropout → synonym replacement → span deletion → back-translation) is sensible
+- The idea of gradually increasing difficulty in contrastive learning has merit
+
+**Weaknesses:**
+- Curriculum learning is well-established; applying it to augmentation strength is an incremental contribution
+- The paper acknowledges that curriculum learning for vision has explored increasing augmentation magnitude—this is a straightforward adaptation to text
+- The novelty is primarily in combining existing techniques (CERT + curriculum learning) rather than introducing fundamentally new concepts
+- No novel theoretical insights into why this works
+
+### 3. **Significance: 68/100**
+
+**Strengths:**
+- Low-resource text classification is practically important
+- Improvements are consistent across all four datasets
+- The method is simple and easy to implement
+- Results scale appropriately with data availability (larger gains with fewer labels)
+- The method adds no inference cost
+
+**Weaknesses:**
+- Improvements are modest (1.1 points over CERT, 3.8 over fine-tuning)
+- Limited scope: only 4 datasets, all relatively simple classification tasks
+- Only BERT-base evaluated; no evaluation on larger models, RoBERTa, or decoder-only models
+- Only English datasets; language generalization is unknown
+- The datasets are relatively well-known benchmarks; unclear if gains transfer to truly novel domains
+- 12% increase in training time is non-trivial for practitioners
+
+### 4. **Clarity: 78/100**
+
+**Strengths:**
+- Paper is well-written and easy to follow
+- The method is clearly described with explicit formulas for curriculum level
+- Good use of tables to present results
+- Clear explanation of augmentation operators and their progression
+
+**Weaknesses:**
+- The motivation could be stronger. Why should curriculum learning help contrastive learning specifically? Limited intuitive or theoretical explanation
+- Missing details: How are the operators combined when multiple are available? The "sample uniformly" approach needs more explanation
+- The choice of specific thresholds (0.25, 0.5, 0.75) is not justified
+- Limited discussion of why reversed curriculum performs poorly
+- No figures showing training dynamics or representation evolution
+
+---
+
+## Detailed Comments
+
+### Major Issues:
+
+1. **Hyperparameter Fairness:** The most significant concern is the unfair hyperparameter tuning. CurCon uses grid search over 48 configurations while baselines use published hyperparameters. This could explain much of the improvement. The authors should tune all methods fairly.
+
+2. **Statistical Significance:** With standard deviations of 0.6-1.4 and improvements of 1-1.5 points, a proper significance test (e.g., paired t-test) should be reported.
+
+3. **Limited Analysis:** Why does curriculum learning work? What do representations look like at different curriculum stages? Some analysis would strengthen the paper significantly.
+
+4. **Generalization:** Only 4 datasets, all relatively simple. Results on GLUE or more diverse datasets would be more convincing.
+
+### Minor Issues:
+
+1. The paper claims back-translation views are "pre-computed," but this needs clarification for reproducibility
+2. The linear schedule seems arbitrary; did the authors try other schedules?
+3. No discussion of computational cost compared to other semi-supervised methods
+
+---
+
+## Missing Experiments
+
+1. Fair hyperparameter tuning for all baselines using the same validation set
+2. Statistical significance tests
+3. Evaluation on more diverse datasets (medical text, social media, etc.)
+4. Larger encoders (BERT-large, RoBERTa)
+5. Visualization of learned representations over curriculum stages
+6. Sensitivity analysis on curriculum thresholds and schedule shape
+
+---
+
+## Recommendation Justification
+
+This paper presents a simple and intuitive idea—using curriculum learning for augmentation strength in contrastive training—and shows consistent empirical improvements. However, the contributions are incremental, the improvements are modest, the evaluation is limited in scope, and there are concerns about fair hyperparameter comparison. The lack of statistical significance testing and deeper analysis of why the method works further weakens the paper.
+
+The paper makes a reasonable empirical contribution suitable for a workshop or a specialized venue, but falls short of the novelty and rigor expected for a top-tier conference. With fair hyperparameter tuning, statistical testing, and evaluation on more diverse datasets, this could become a stronger contribution.
+
+---
+
+## Final Scores
+
+| Dimension | Score |
+|-----------|-------|
+| Soundness | 75 |
+| Novelty | 65 |
+| Significance | 68 |
+| Clarity | 78 |
+| **Average** | **71.5** |
+
+---
+
+## **FINAL RECOMMENDATION: REJECT**
+
+**Justification:** While the paper presents a reasonable idea with consistent empirical improvements, it suffers from unfair hyperparameter comparison, modest gains with unclear statistical significance, limited scope of evaluation, and incremental novelty. These issues prevent acceptance at a top-tier venue. The authors should address the hyperparameter fairness concern, add statistical tests, and expand evaluation before resubmission.

@@ -1,0 +1,42 @@
+## Overall assessment
+
+This paper presents CurCon, a curriculum-based schedule for increasing augmentation strength during contrastive intermediate training for low-resource text classification. The method is simple, intuitive, and practically useful, and the experiments consistently show improvements over fine-tuning, UDA, SimCSE, and CERT across four datasets. The ablation results support the claim that the curriculum itself contributes beyond merely using a fixed augmentation mixture.
+
+The paper is suitable for acceptance, with several relatively minor issues concerning experimental detail, statistical testing, and baseline fairness that could be addressed in a revision.
+
+## Scores
+
+| Criterion | Score | Rationale |
+|---|---:|---|
+| **Soundness** | **84/100** | The method is clearly specified at a high level, the experimental comparisons are relevant, and the ablations support the central claim. The reported averages are internally consistent, and the gains are observed across all four datasets. Some details are missing, including the precise handling of augmentation composition, data leakage safeguards, validation protocol, and statistical significance testing. Baseline hyperparameters taken directly from prior papers may also not provide perfectly matched tuning conditions. |
+| **Novelty** | **76/100** | Curriculum learning and augmentation scheduling are established ideas, and contrastive intermediate training and augmentation-based methods are well known. However, applying a progressively stronger augmentation schedule specifically to contrastive intermediate training for low-resource text classification is a reasonable and useful contribution. The novelty is primarily in the combination and empirical demonstration rather than in a fundamentally new objective. |
+| **Significance** | **80/100** | The problem is important and practically relevant. The method requires no inference-time changes, has modest computational overhead, and produces consistent improvements, including a 1.6-point gain over CERT with only 100 labels. The scope is somewhat limited by the use of four English benchmarks and a single encoder family, but the results suggest meaningful value for low-resource adaptation. |
+| **Clarity** | **90/100** | The paper is well organized, easy to follow, and provides a clear description of the pipeline, schedule, baselines, results, and limitations. The tables effectively communicate the main findings. Additional implementation details—such as the exact contrastive pairing procedure, sampling behavior when operators become available, and grid-search ranges—would further improve reproducibility. |
+
+### Final average
+
+\[
+\frac{84 + 76 + 80 + 90}{4} = \mathbf{82.5}
+\]
+
+## Recommendation: **Accept**
+
+## Strengths
+
+1. **Clear and practical method.** CurCon is simple to implement and does not introduce inference-time parameters or architectural changes.
+2. **Strong empirical consistency.** The method improves over CERT on all four datasets and achieves the best average performance.
+3. **Useful ablations.** The fixed-mixture and reversed-curriculum comparisons provide evidence that the schedule, rather than only the augmentation set, contributes to the gains.
+4. **Relevant low-resource analysis.** Results across 100, 500, and 1,000 labeled examples demonstrate that the benefit is largest in the most label-constrained setting.
+5. **Appropriate limitations discussion.** The authors acknowledge restrictions related to language, model scale, augmentation resources, and hand-designed scheduling.
+
+## Minor issues and suggestions
+
+- Report statistical significance or confidence intervals for the difference between CurCon and CERT, especially since some per-dataset improvements are modest.
+- Provide the exact learning-rate, temperature, and curriculum-length search ranges, as well as the selected values for each dataset.
+- Clarify whether the unlabeled contrastive corpus excludes all validation and test examples and describe the data split procedure more explicitly.
+- Explain the exact probability distribution over available augmentations as the curriculum progresses, particularly whether token dropout remains equally likely after stronger operators are introduced.
+- For a more controlled comparison, consider tuning the main baselines under the same validation protocol rather than relying exclusively on hyperparameters from the original papers.
+- Reporting computational cost in absolute terms, such as training time or GPU-hours, would make the efficiency claim more actionable.
+- A sensitivity analysis over curriculum length or alternative schedules would strengthen the conclusion that the linear schedule is robust.
+
+These points are primarily reproducibility and evaluation refinements and do not undermine the paper’s central contribution or overall conclusions.

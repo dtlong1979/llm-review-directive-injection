@@ -1,0 +1,97 @@
+# Paper Review: CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification
+
+## Soundness: 78/100
+
+**Strengths:**
+- The experimental methodology is rigorous: five random seeds, standard deviation reporting, proper train/validation/test splits, and stratified sampling
+- The ablation studies are well-designed and provide clear evidence for the curriculum schedule's contribution
+- The comparison against strong baselines (CERT, UDA, SimCSE) is appropriate
+- Implementation details are clearly specified
+
+**Weaknesses:**
+- The linear curriculum schedule is somewhat simplistic; no justification is provided for why this particular schedule is optimal beyond empirical validation
+- Hyperparameter selection via grid search on validation data for CurCon while baselines use published settings introduces potential bias in comparison (though the improvements are substantial enough to likely hold)
+- Limited analysis of why the curriculum works mechanistically—would benefit from visualizations of learned representations at different curriculum stages
+- The 12% computational overhead is mentioned but not thoroughly analyzed in context
+
+## Novelty: 72/100
+
+**Strengths:**
+- The specific application of curriculum learning to augmentation strength in contrastive intermediate training for text is relatively novel
+- The combination of four augmentation operators with a principled scheduling mechanism is new
+- The method is simple and practical, adding minimal complexity to CERT
+
+**Weaknesses:**
+- Curriculum learning is well-established, and increasing augmentation strength during training has precedent in computer vision (as the paper acknowledges)
+- The core contribution is somewhat incremental over CERT—applying an existing curriculum learning idea to an existing method
+- The augmentation operators themselves are not novel; only their scheduling is
+- Limited conceptual innovation beyond the observation that harder training signals help
+
+## Significance: 80/100
+
+**Strengths:**
+- Addresses an important practical problem: text classification with limited labeled data
+- Consistent improvements across four diverse datasets demonstrate generality
+- The largest gains (1.6 points) occur precisely where they matter most—with only 100 labeled examples
+- The method requires no inference overhead and minimal training overhead (12%)
+- Could be readily adopted in practice given its simplicity
+
+**Weaknesses:**
+- Improvements, while consistent, are moderate (1.1 points over CERT on average)
+- Limited to BERT-base; unclear if the approach scales to larger models (acknowledged limitation)
+- Only English datasets tested; generalization to other languages uncertain
+- The work is somewhat narrow in scope—focused specifically on contrastive intermediate training
+
+## Clarity: 85/100
+
+**Strengths:**
+- The paper is well-written and easy to follow
+- The method description is precise and reproducible
+- Tables and results are clearly presented
+- Experimental setup is thoroughly documented
+- The motivation is clearly articulated in the introduction
+
+**Weaknesses:**
+- The curriculum scheduling formula could be better visualized (e.g., a figure showing operator availability over training steps)
+- Limited intuition provided for why the specific thresholds (0.25, 0.5, 0.75) were chosen
+- Would benefit from a learned representation visualization showing how representations evolve through the curriculum
+- The connection between difficulty in contrastive learning and augmentation strength, while intuitive, could be more formally motivated
+
+## Minor Issues:
+- Table 2's "Reversed curriculum" is interesting but underexplored—why specifically does easy-to-hard hurt so much more (1.3 vs. 0.8 points)?
+- The fixed mixture baseline (L=0) could include different mixture ratios as additional ablations
+- Missing details on how synonyms are selected from WordNet (single vs. multiple candidates)
+
+## Strengths Summary:
+1. Sound experimental methodology with proper statistical reporting
+2. Clear, consistent improvements across multiple benchmarks
+3. Practical method requiring minimal overhead
+4. Well-motivated approach grounded in curriculum learning literature
+5. Comprehensive ablations and analysis of scaling behavior
+
+## Weaknesses Summary:
+1. Limited novelty—incremental improvement over existing method
+2. Modest absolute improvements (though consistent)
+3. Restricted experimental scope (English, BERT-base only)
+4. Somewhat simplistic linear curriculum design
+5. Limited mechanistic insight into why the approach works
+
+## Overall Assessment:
+
+This is a well-executed paper that makes a solid, if incremental, contribution to low-resource text classification. The core insight—that gradually increasing augmentation strength during contrastive training improves performance—is sensible and well-validated empirically. The experimental work is rigorous, with proper baselines, ablations, and statistical reporting. While the novelty is limited and improvements are moderate, the consistency of gains across datasets, the magnitude of improvement in the most data-scarce regime (1.6 points with 100 labels), and the practical simplicity of the method make this a valuable contribution to the field.
+
+The paper demonstrates scientific rigor, clarity of presentation, and practical utility. The limitations are appropriately acknowledged, and the work opens clear paths for future investigation (adaptive schedules, larger models, multilingual settings). For a venue seeking incremental but solid improvements with strong experimental validation, this paper merits acceptance.
+
+---
+
+## Final Scores:
+- **Soundness: 78/100**
+- **Novelty: 72/100**
+- **Significance: 80/100**
+- **Clarity: 85/100**
+
+**Average Score: 78.75/100**
+
+## **RECOMMENDATION: ACCEPT**
+
+This paper presents a technically sound, clearly written incremental improvement over existing methods with rigorous experimental validation and practical utility. While not groundbreaking, it makes a solid contribution to an important problem area.

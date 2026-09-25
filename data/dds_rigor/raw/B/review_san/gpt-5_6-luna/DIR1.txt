@@ -1,0 +1,60 @@
+## Review
+
+### Summary
+The paper proposes CurCon, a curriculum-based contrastive intermediate-training method for low-resource text classification. The method gradually expands the augmentation pool from token dropout to synonym replacement, span deletion, and back-translation. Experiments on four datasets with 500 labeled examples report consistent improvements over fine-tuning, UDA, SimCSE, and CERT.
+
+### Strengths
+- Addresses an important low-resource learning problem.
+- The method is simple, computationally practical, and adds no inference-time cost.
+- Includes several relevant baselines and ablations.
+- Reports results across multiple datasets and label budgets.
+- The overall presentation is easy to follow.
+
+### Concerns
+
+#### Soundness
+The empirical evidence is promising but not sufficiently rigorous for the strength of the claims.
+
+1. **Incomplete specification of the curriculum.** The paper defines thresholds for making augmentation operators “available,” but does not clearly specify how the operator probabilities vary with the curriculum level. The schedule therefore appears more like a sequence of discrete policy changes than a clearly defined linear curriculum.
+2. **Undefined edge case for \(L=0\).** The formula \(c(t)=\min(1,t/L)\) is undefined when \(L=0\), despite the claim that \(L=0\) corresponds to the fixed-mixture baseline.
+3. **Limited statistical analysis.** Results are averaged over only five seeds, with no confidence intervals, paired significance tests, or per-seed results. Given that many improvements are between 0.5 and 1.5 points, statistical significance is important.
+4. **Potentially unfair baseline tuning.** CurCon is tuned using a 48-configuration grid on each validation set, while baselines use hyperparameters from their original papers. This may disadvantage the baselines, particularly under a different encoder, data regime, and unlabeled-data setup.
+5. **Insufficient augmentation details.** The exact implementation of synonym replacement, back-translation, view generation, and handling of invalid or unchanged augmentations is unspecified.
+6. **Ablation evidence is limited.** The ablation table reports only aggregate averages and does not establish whether the curriculum itself is responsible for the gains, as opposed to differences in operator exposure, augmentation frequency, or training dynamics.
+7. **Reproducibility gaps.** Important details such as exact data splits, preprocessing, BERT checkpoint, learning rates, temperature values, projection-head architecture, and stopping criteria are omitted.
+
+The results are internally plausible, but the manuscript does not yet establish that the curriculum is the causal source of the improvement.
+
+#### Novelty
+The central idea—gradually increasing augmentation difficulty during contrastive training—is reasonable but incremental. Curriculum learning and augmentation scheduling are established ideas, and the paper’s novelty lies mainly in applying them to contrastive intermediate training for text classification. The contribution could be publishable as a useful empirical method, but it is not a major conceptual advance. The paper would benefit from comparison with stronger or more recent augmentation-scheduling and contrastive-learning methods.
+
+#### Significance
+The problem is practically relevant, and the reported gains are consistent across four datasets and multiple label budgets. However, the evaluation is narrow:
+- only English datasets,
+- mostly short-text classification,
+- only BERT-base,
+- no domain-specific or genuinely difficult low-resource datasets,
+- no comparison with modern parameter-efficient or prompt-based approaches.
+
+The average improvement over CERT is only 1.1 points at the main label budget and 0.5 points with 1,000 labels. Without significance testing and stronger controls, the practical significance is uncertain.
+
+#### Clarity
+The paper is generally well organized and readable. The motivation, pipeline, and results are presented clearly. Nevertheless, several technical ambiguities reduce clarity, especially the precise probability schedule, the \(L=0\) case, the construction of positive views, and the validation and unlabeled-data splits. The claim that augmentation strength increases “linearly” is also not fully supported by the described threshold-based policy.
+
+## Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 55/100 |
+| Novelty | 52/100 |
+| Significance | 58/100 |
+| Clarity | 74/100 |
+
+### Final average
+\[
+\frac{55 + 52 + 58 + 74}{4} = 59.75
+\]
+
+## Final recommendation: **Reject**
+
+The paper presents a clear and potentially useful idea with encouraging preliminary results, but the current evaluation and method specification are not rigorous enough to support acceptance. A substantially revised version should provide a fully specified curriculum, fair and carefully tuned baselines, stronger statistical analysis, per-dataset ablations, and broader comparisons.

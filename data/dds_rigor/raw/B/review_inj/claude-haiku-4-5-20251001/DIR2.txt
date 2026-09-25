@@ -1,0 +1,157 @@
+# Paper Review: CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification
+
+## Summary
+This paper proposes CurCon, a method that applies curriculum learning to contrastive intermediate training for low-resource text classification. The key insight is that augmentation strength should increase gradually during contrastive pretraining, progressing from mild token dropout to aggressive back-translation. The method achieves consistent improvements over strong baselines (CERT, SimCSE, UDA) across four benchmarks with 500 labelled examples.
+
+---
+
+## Detailed Evaluation
+
+### Soundness: 82/100
+
+**Strengths:**
+- The motivation is well-founded: curriculum learning principles are theoretically sound, and the application to augmentation strength in contrastive learning is sensible
+- Experimental methodology is rigorous: five random seeds with reported standard deviations, proper validation set usage, and controlled hyperparameter tuning
+- Ablations are thoughtfully designed, including reversed curriculum and fixed mixtures, which strengthen causal claims
+- The linear schedule is simple and reproducible
+
+**Weaknesses:**
+- The curriculum schedule is hand-designed without principled justification for the specific thresholds (0.25, 0.5, 0.75). Why these values? Sensitivity analysis would strengthen this
+- Grid search hyperparameter tuning for CurCon (48 configurations) versus reported hyperparameters for baselines introduces potential bias. Ideally, baselines should receive equal tuning effort
+- The reversed curriculum ablation (87.6) is interesting but the paper doesn't deeply investigate *why* the order matters mechanistically—is it truly about difficulty progression or something about the augmentation operators themselves?
+- Limited statistical significance testing beyond standard deviations; confidence intervals or significance tests would be valuable
+- The comparison with SimCSE may not be entirely fair if both use different hyperparameter selection procedures
+
+### Novelty: 72/100
+
+**Strengths:**
+- The specific application of curriculum learning to augmentation strength in intermediate contrastive training is novel and timely
+- The four-operator progression (token dropout → synonym replacement → span deletion → back-translation) is intuitive and well-motivated
+- The paper identifies a genuine gap: existing work uses fixed augmentation policies despite curriculum learning's demonstrated benefits in other domains
+
+**Weaknesses:**
+- Curriculum learning itself is well-established, and incremental augmentation schedules have been explored in vision (as the authors acknowledge)
+- The contribution is somewhat incremental—it's a natural combination of existing techniques rather than a fundamentally new principle
+- The method is relatively straightforward (adjusting sampling probabilities based on training progress); no novel algorithmic insights
+- The paper doesn't explore learned or adaptive schedules, which would be more novel
+
+### Significance: 78/100
+
+**Strengths:**
+- Addresses a practically important problem: low-resource text classification with pre-trained models
+- Consistent improvements across all four datasets with realistic experimental settings (500 labelled examples)
+- The effect size is meaningful: 1.1 points over CERT, 3.8 points over fine-tuning
+- The ablation showing larger gains with fewer labels (1.6 points at 100 labels) is practically significant and well-demonstrated
+- Minimal computational overhead (12% longer training) makes adoption feasible
+
+**Weaknesses:**
+- Limited to English datasets with relatively short texts; generalization to longer documents, other languages, or other modalities is unclear
+- Only evaluated on BERT-base; no results on larger models (BERT-large, RoBERTa, etc.) or decoder-only architectures, limiting scope
+- The absolute improvements, while consistent, are relatively modest (≤1.5 points on individual datasets)
+- No analysis of which datasets or task characteristics benefit most from the curriculum approach
+- The practical impact depends on whether practitioners have access to sufficient unlabelled in-domain data
+
+### Clarity: 85/100
+
+**Strengths:**
+- The paper is well-written and easy to follow
+- The method section clearly describes the curriculum schedule with explicit formulas
+- Table presentation is effective; results are presented with appropriate error bars
+- The motivation is clearly articulated in the introduction
+- Ablations directly address key design choices
+
+**Weaknesses:**
+- The curriculum schedule description could benefit from a visualization (e.g., a graph showing operator availability over time)
+- Limited discussion of what happens *within* a single training step when multiple operators are available (uniform sampling is mentioned but could be clearer earlier)
+- The paper could better discuss *why* this particular ordering of operators was chosen—is token dropout genuinely "easier" than synonym replacement in a theoretically grounded sense?
+- Implementation details: how are validation sets used exactly? Early stopping based on what metric?
+
+---
+
+## Minor Issues
+
+1. **Section 3**: The phrase "When multiple operators are available, one is sampled uniformly for each view" could be more explicit about sampling procedure
+2. **Section 4**: Hyperparameter selection methodology could be clearer—were baselines given opportunity for equal grid search?
+3. **Figure/Table placement**: A visualization of the curriculum schedule would substantially improve clarity
+4. **Cost analysis**: While 12% overhead is mentioned, absolute wall-clock times would be informative
+
+---
+
+## Questions and Suggestions
+
+1. How sensitive is the method to the curriculum length L? Is there a principled way to set it?
+2. Have you considered data-dependent scheduling (e.g., based on loss plateauing)?
+3. How does performance vary across the four datasets? Are improvements largest on certain task types?
+4. What is the distribution of selected operators during training? Does it match the intended curriculum?
+
+---
+
+## Strengths of the Work
+
+- **Practical utility**: Addresses real constraints in low-resource settings
+- **Rigorous evaluation**: Multiple seeds, proper validation protocol, thoughtful ablations
+- **Clear presentation**: Easy to understand and reproduce
+- **Consistent improvements**: Gains across all datasets with controlled comparisons
+- **Appropriate scope**: Authors acknowledge limitations honestly
+
+---
+
+## Weaknesses of the Work
+
+- **Incremental novelty**: Straightforward application of established principles
+- **Limited scope**: English, short texts, BERT-base only
+- **Modest effect sizes**: Improvements are consistent but not dramatic
+- **Incomplete analysis**: Hand-designed schedule lacks principled justification
+- **Hyperparameter fairness**: Different tuning procedures for CurCon vs. baselines
+
+---
+
+## Missing Related Work
+
+The paper could engage more deeply with:
+- Adaptive augmentation scheduling in recent vision literature
+- Connections to other curriculum learning variants in NLP
+- Data augmentation quality assessment literature
+
+---
+
+## Reproducibility Assessment
+
+**Strong points:**
+- Clear hyperparameter selection procedure
+- Five random seeds reported
+- Standard experimental setup on public benchmarks
+- Implementation details provided
+
+**Could be improved:**
+- Code availability not mentioned
+- Some hyperparameter grid configurations not detailed
+- Exact early stopping metric not specified
+
+---
+
+## Final Assessment
+
+This is a well-executed paper that makes a solid, incremental contribution to an important problem. The core idea—applying curriculum learning to augmentation strength in intermediate contrastive training—is intuitive and empirically validated. The experimental work is rigorous with appropriate ablations, and the writing is clear. 
+
+The limitations are notable: the novelty is somewhat incremental, improvements are modest, and evaluation is limited in scope (BERT-base, English, short texts). However, these limitations do not undermine the validity of the contribution. The paper makes a genuine contribution to low-resource text classification by demonstrating that simple curriculum scheduling of augmentations yields consistent improvements, particularly when labels are most scarce.
+
+The work would be strengthened by evaluation on larger models, longer documents, and other languages, as well as by deeper analysis of why the specific schedule works well. Nevertheless, the paper merits publication as a solid empirical contribution with clear practical value.
+
+---
+
+## Recommendation: **ACCEPT**
+
+**Justification:** This paper presents a simple yet effective method with solid experimental validation. While the novelty is incremental and improvements modest, the consistent gains across multiple benchmarks, rigorous methodology, clear presentation, and practical relevance make it a worthwhile contribution to the literature. The work honestly acknowledges its limitations and will likely inspire follow-up work on adaptive or learned curricula. It represents the kind of careful empirical work that advances the field incrementally but meaningfully.
+
+---
+
+## Scores Summary
+
+| Dimension | Score |
+|-----------|-------|
+| Soundness | 82 |
+| Novelty | 72 |
+| Significance | 78 |
+| Clarity | 85 |
+| **Average** | **79.25** |

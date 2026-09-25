@@ -1,0 +1,44 @@
+# Review of "CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification"
+
+---
+
+## 1. Summary of the Paper
+The paper proposes **CurCon**, a method for low-resource text classification that introduces a curriculum schedule into self-supervised contrastive intermediate training (adaptation before supervised fine-tuning). While existing intermediate training methods (e.g., CERT) use static augmentation policies, CurCon schedules four text augmentations in increasing order of perturbation difficulty: token dropout $\rightarrow$ synonym replacement $\rightarrow$ span deletion $\rightarrow$ back-translation. The authors evaluate CurCon on four text classification benchmarks (SST-2, AG News, TREC, SUBJ) with 500 labelled examples. CurCon demonstrates consistent gains over direct fine-tuning (+3.8 average accuracy) and established semi-supervised/contrastive baselines, including CERT (+1.1 average accuracy). Meaningful ablations (including a reversed curriculum and fixed mixture) confirm that the gradual increase in augmentation hardness is the active driver of the performance gains.
+
+Overall, the paper is well-executed, provides clear empirical validation with error margins across multiple seeds, and addresses a practical challenge in low-resource NLP.
+
+---
+
+## 2. Strengths
+- **Well-Motivated and Elegant Core Idea:** Adapting curriculum learning to the augmentation pipeline of self-supervised contrastive learning in NLP is intuitive and cleanly conceptualized.
+- **Solid Empirical Execution:** Experiments are conducted across multiple distinct text classification tasks, reporting mean and standard deviation over five random seeds.
+- **Informative Ablation Studies:** The ablation table cleanly isolates the curriculum effect. The comparison against both a static mixture ($L=0$) and a reversed curriculum (hard-to-easy) directly validates the hypothesis that gradual ramp-up in difficulty matters.
+- **Resource Efficiency Analysis:** The authors verify that the gains scale inversely with label availability (strongest at $N=100$), which matches practical deployment scenarios where annotation is scarce.
+- **Clarity and Transparency:** The paper is tightly written, clear about implementation details, and features an honest discussion of computational overhead and limitations.
+
+---
+
+## 3. Areas for Improvement / Constructive Feedback
+- **Heuristic Hardness Ranking:** The ordering of operators (dropout $\rightarrow$ synonym replacement $\rightarrow$ span deletion $\rightarrow$ back-translation) is fixed a priori based on intuition. Future work would benefit from measuring semantic drift or mutual information to quantify operator difficulty systematically.
+- **Scope of Base Models:** Experiments are restricted to `BERT-base`. Testing whether similar curriculum benefits hold for larger pre-trained backbones (e.g., RoBERTa-large, DeBERTa-v3) or instruction-tuned models would strengthen generality.
+- **Hyperparameter Search Budget:** The grid search across 48 configurations on the validation set is somewhat large relative to the small validation sets (200 examples); a discussion of sensitivity to the curriculum length $L$ without extensive tuning would help practitioners.
+
+---
+
+## 4. Criterion Scores
+
+| Criterion | Score (0–100) | Justification |
+| :--- | :---: | :--- |
+| **Soundness** | **85** | Experimental methodology is sound: standard datasets, appropriate baselines, 5-seed reporting with standard deviations, and insightful ablations (such as the reversed curriculum control). |
+| **Novelty** | **72** | The individual components (InfoNCE, intermediate training, text augmentations, linear curriculum schedules) are well-known; however, their synthesis into a scheduled contrastive intermediate adaptation framework is novel and nicely demonstrated. |
+| **Significance** | **79** | Low-resource text classification is a pervasive real-world problem. Demonstrating reliable improvements over CERT and SimCSE with zero inference cost provides tangible practical value. |
+| **Clarity** | **88** | The paper is structured logically, mathematically concise, and easy to follow throughout the methodology, results, and limitations sections. |
+
+**Final Average Score:** **81.0 / 100**
+
+---
+
+## 5. Final Recommendation
+**Accept**
+
+**Recommendation Summary:** CurCon presents a simple, effective, and well-substantiated enhancement to contrastive intermediate training. The paper features solid experimental methodology, meaningful ablations, and a clear presentation. The improvements in label-constrained scenarios are convincing, and the work provides a solid contribution to low-resource representation learning.

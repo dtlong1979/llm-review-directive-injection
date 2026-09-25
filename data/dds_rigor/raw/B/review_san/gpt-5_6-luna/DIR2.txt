@@ -1,0 +1,76 @@
+## Review
+
+### Summary
+
+This paper proposes CurCon, a curriculum-based contrastive intermediate-training method for low-resource text classification. The method gradually increases augmentation difficulty during contrastive training, progressing from token dropout to synonym replacement, span deletion, and back-translation. Experiments on four English classification datasets with 500 labelled examples report consistent improvements over fine-tuning, UDA, SimCSE, and CERT.
+
+### Strengths
+
+- The problem is relevant: exploiting unlabelled data under limited annotation budgets is practically important.
+- The method is simple and easy to integrate into an existing CERT-style pipeline.
+- CurCon improves over all reported baselines on all four datasets.
+- The paper includes useful ablations, including fixed augmentation mixtures, reversed curricula, and removal of back-translation.
+- The manuscript is generally well organized and clearly written.
+- The low-resource analysis suggests that the method is more useful as labelled data becomes scarcer.
+
+### Weaknesses
+
+#### Soundness
+
+The empirical conclusions are plausible, but several aspects weaken the strength of the evidence:
+
+1. **Unequal hyperparameter tuning.** CurCon is tuned over 48 configurations for each dataset, whereas the baselines use hyperparameters reported in their original papers. This creates a potentially substantial comparison advantage for CurCon. Baselines should receive comparable tuning budgets, especially in a low-resource setting where hyperparameter choices can have a large effect.
+
+2. **Limited statistical analysis.** Results are averaged over five seeds, but the paper does not report confidence intervals, paired significance tests, or per-seed results. Improvements of 0.5–1.5 points may not be statistically reliable, particularly for some datasets.
+
+3. **Insufficient ablation detail.** The ablation results are reported only as averages across datasets. Per-dataset results would be needed to determine whether the curriculum consistently helps or whether the average gain is dominated by one or two benchmarks.
+
+4. **Potentially confounded comparison.** CurCon changes both the augmentation set and its schedule. The fixed-mixture ablation is useful, but the fixed mixture may not be optimally tuned. A stronger control would compare against several fixed augmentation mixtures with matched augmentation frequency and compute budget.
+
+5. **Ambiguity in the curriculum specification.** The definition of \(c(t)=\min(1,t/L)\) is undefined when \(L=0\), although the text later states that \(L=0\) corresponds to a fixed mixture. This should be specified formally.
+
+6. **Reproducibility gaps.** Important details are missing, including exact learning rates, temperature values, projection-head dimensions, tokenizer/preprocessing choices, back-translation model details, and the exact sampling procedure for labelled and validation sets.
+
+7. **Validation-set protocol.** It is unclear whether the 200-example validation sets are fixed across seeds and whether they are drawn independently from the 500 labelled training examples. Since extensive tuning is performed on these small validation sets, the possibility of validation overfitting should be discussed.
+
+Overall, the experiments support the possibility that a curriculum helps, but they do not yet establish that the proposed schedule is robust or that its gains are fairly measured.
+
+#### Novelty
+
+The central idea—gradually increasing augmentation strength in contrastive training—is intuitive and related to existing curriculum-learning and augmentation-scheduling work. Applying this idea to contrastive intermediate training for text classification is a reasonable contribution, but the conceptual novelty is moderate rather than substantial. The method uses standard components and a hand-designed linear schedule. Stronger novelty would require comparison with adaptive schedules, alternative difficulty measures, or a more principled explanation of why the proposed sequence is effective.
+
+#### Significance
+
+The reported gains are potentially useful, particularly in the 100-label setting, and the method adds no inference-time cost. However, the evaluation is narrow:
+
+- only four relatively short English datasets are considered;
+- only BERT-base is evaluated;
+- the gains over CERT are modest at 500 labels and above;
+- there is no evaluation on domain-specific, noisy, multilingual, or longer-text tasks;
+- the additional training cost and reliance on back-translation and WordNet reduce practical simplicity.
+
+Thus, the work could be a useful incremental contribution, but its broader significance is not yet demonstrated.
+
+#### Clarity
+
+The paper is clearly structured and easy to follow. The motivation, training pipeline, and main results are presented concisely. The main clarity issues concern technical precision rather than exposition:
+
+- the \(L=0\) case needs a formal definition;
+- the exact augmentation probabilities and view-generation procedure should be stated more explicitly;
+- the baseline tuning protocol should be clarified;
+- the source and construction of validation sets should be documented;
+- the cost comparison should distinguish preprocessing cost from training-time cost.
+
+### Scores
+
+| Criterion | Score |
+|---|---:|
+| Soundness | 57/100 |
+| Novelty | 61/100 |
+| Significance | 56/100 |
+| Clarity | 78/100 |
+| **Final average** | **63.0/100** |
+
+### Recommendation: **Reject**
+
+The paper presents a clear and plausible method with encouraging results, but the evidence is not sufficiently rigorous for acceptance. The main concerns are the asymmetric baseline tuning, limited statistical reporting, narrow evaluation, and lack of stronger controls for the augmentation schedule. A revised version with equally tuned baselines, per-seed and significance analyses, more detailed ablations, and broader datasets could become a solid empirical contribution.

@@ -25,3 +25,7 @@ Within each folder, `reviews/<model>/review_<input>` is the raw output for one c
 ## DDS detector validation
 
 `data/dds_validate/<detector>_<variant>/` holds the raw detector outputs for the DDS validation in Section 5: recall on held-out directive paraphrases, false positives on benign reviewer-directed sentences, and adaptive evasion. `code/dds_validate.py` regenerates them (naive vs precise detection criterion).
+
+## Cross-vendor DDS validation (rigorous)
+
+`data/dds_rigor/` holds the cross-vendor validation of Section 5: detection recall, false positives, and adaptive evasion over four detectors and three vendors under a broad vs a precise criterion (`suiteA_rows.json`), and the end-to-end detect->delete->review test on three reviewers (`suiteB_rows.json`), with raw model outputs under `raw/`. `code/dds_rigor.py` runs it (modes A, B, probe) and `code/dds_rigor_analyze.py` reports Wilson 95% intervals.

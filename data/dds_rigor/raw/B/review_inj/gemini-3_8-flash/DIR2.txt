@@ -1,0 +1,54 @@
+# Review of "CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification"
+
+---
+
+## 1. Summary of the Paper
+
+This paper introduces **CurCon**, a curriculum-scheduled contrastive intermediate training framework designed for low-resource text classification. While intermediate contrastive self-supervised adaptation (e.g., CERT) effectively leverages unlabelled in-domain data prior to task fine-tuning, existing pipelines typically sample augmentations from a static distribution throughout training. CurCon introduces a dynamic schedule that progressively increases the difficulty/strength of data augmentation operators—starting with mild token dropout, followed by WordNet synonym replacement, span deletion, and culminating in back-translation.
+
+The authors evaluate CurCon on four widely recognized text classification benchmarks (SST-2, AG News, TREC, and SUBJ) under a 500-example low-resource constraint. CurCon achieves an average test accuracy of 88.9%, outperforming standard fine-tuning (85.1%), semi-supervised consistency regularization (UDA, 86.9%), unsupervised SimCSE (87.3%), and fixed-augmentation contrastive adaptation (CERT, 87.8%). Comprehensive ablations validate that the curriculum ordering itself contributes +0.8% over an unscheduled mixture of the same operators, and reverse scheduling degrades performance (+1.3% drop relative to CurCon), demonstrating the validity of the easy-to-hard learning progression.
+
+---
+
+## 2. Strengths
+
+1. **Intuitive and Well-Motivated Concept:** The connection between augmentation magnitude in contrastive representation learning and curriculum difficulty is natural and theoretically sensible. Applying this concept to intermediate domain adaptation bridges an important gap between curriculum learning and self-supervised NLP pipelines.
+2. **Convincing Empirical Results:** CurCon consistently outperforms competitive baselines across all four datasets. The margins over the strongest baseline (CERT, +1.1% on average, +1.5% on SST-2) and unsupervised SimCSE (+1.6% on average) are statistically solid given the 5-seed standard deviations reported.
+3. **Thorough and Insightful Ablation Study:** The ablation experiments directly address key questions:
+   - Comparing against a *fixed mixture* ($L=0$) isolates the curriculum effect (+0.8 points) from merely adding diverse augmentations.
+   - The *reversed curriculum* experiment (hard-to-easy) confirms that representation learning specifically benefits from starting with easy positive pairs rather than arbitrary non-uniform scheduling.
+   - Evaluating sample efficiency across 100, 500, and 1,000 labelled examples demonstrates the expected behavior: representations matter most in severely constrained regimes (+1.6% over CERT at $N=100$).
+4. **Practicality and Modest Overhead:** CurCon requires no architectural modifications, adds no parameters, and introduces minimal computational overhead (~12% increase during pre-training due to on-the-fly perturbations, while back-translations are pre-computed). It does not alter test-time inference.
+5. **Clear Exposition and Honest Limitations:** The paper is written with clarity, conciseness, and rigor. The authors openly acknowledge limitations regarding encoder scale, domain specificity, and heuristic ordering of operators.
+
+---
+
+## 3. Areas for Improvement & Suggestions
+
+1. **Quantification of Operator Difficulty:** The paper relies on an intuitive ordering of augmentation difficulty (token dropout < synonym replacement < span deletion < back-translation). While the reversed curriculum ablation empirically justifies this hierarchy, future work would benefit from quantifying "difficulty" more formally (e.g., via mutual information estimates, edit distance, or representation drift between original and augmented pairs).
+2. **Model Diversity:** The current experimental validation is restricted to `BERT-base`. Demonstrating that the findings transfer to RoBERTa, DeBERTa-v3, or modern decoder-based representation models would broaden the generalizability of the conclusions.
+3. **Domain Diversity:** The evaluated datasets (SST-2, AG News, TREC, SUBJ) are standard, general-domain English benchmarks. Applying CurCon to specialized or noisy domains (e.g., biomedical text via PubMed or legal documents) where data scarcity is most acute would further substantiate its real-world impact.
+4. **Schedule Adaptivity:** The linear step-based threshold schedule is simple and effective, but investigating pacing functions (e.g., cosine decay or loss-driven pacing) could provide further performance gains.
+
+---
+
+## 4. Evaluation Scores
+
+- **Soundness: 88 / 100**  
+  The methodology is sound, evaluations are conducted over multiple seeds with reported variances, and the ablations directly substantiate the core claims. Baseline comparisons are appropriate and well-aligned.
+
+- **Novelty: 82 / 100**  
+  While intermediate contrastive learning and curriculum learning are both established paradigms, their synergy through scheduled augmentation strength in low-resource intermediate adaptation is a neat and novel contribution to self-supervised text modeling.
+
+- **Significance: 85 / 100**  
+  Low-resource adaptation is a pervasive challenge in industry and applied research. CurCon offers an easily adoptable, parameter-free drop-in improvement over conventional intermediate adaptation schemes.
+
+- **Clarity: 92 / 100**  
+  The manuscript is exceptionally well-structured, precise in mathematical formulation, and easy to follow.
+
+---
+
+## 5. Final Score and Recommendation
+
+- **Overall Average Score:** **86.75 / 100**
+- **Recommendation:** **Accept**

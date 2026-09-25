@@ -1,0 +1,129 @@
+# Paper Review: CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification
+
+## Detailed Scoring
+
+### 1. Soundness (75/100)
+
+**Strengths:**
+- The core idea is theoretically motivated by curriculum learning principles, which are well-established
+- Experimental methodology is sound: multiple datasets, proper train/validation/test splits, reporting mean and standard deviation over 5 seeds
+- Ablation studies are included and informative
+- Hyperparameter selection via grid search on validation sets is appropriate
+
+**Weaknesses:**
+- Limited theoretical justification for *why* augmentation curriculum specifically helps contrastive learning beyond general curriculum learning intuitions
+- The linear curriculum schedule appears arbitrary; no justification for the specific thresholds (0.25, 0.5, 0.75) or comparison with other schedules
+- The reversed curriculum ablation shows 1.3-point drop, suggesting the effect is real but the paper doesn't deeply investigate *why* this order is optimal
+- No statistical significance testing despite small improvement margins (1.1 points over CERT)
+- Grid search for CurCon hyperparameters (48 configurations) vs. reported baselines from papers—potential unfair comparison if baselines weren't similarly tuned
+
+**Concerns:**
+- The 12% computational overhead is non-negligible
+- Limited analysis of when/why the method works beyond "more labelled examples reduces gains"
+
+### 2. Novelty (65/100)
+
+**Strengths:**
+- The specific application of curriculum learning to augmentation scheduling in contrastive intermediate training is novel
+- The particular combination of four augmentation operators with a linear schedule hasn't been explored before in this context
+
+**Weaknesses:**
+- Curriculum learning is well-established; augmentation scheduling in vision is known
+- The method is a relatively straightforward combination of existing ideas (CERT + curriculum learning)
+- Only incremental extension of CERT (same pipeline, same augmentations, just scheduled differently)
+- No exploration of learned or adaptive curricula (acknowledged as limitation)
+- The insight that "harder training signals help" is intuitive and not particularly deep
+
+**Assessment:** The work is novel but represents an incremental improvement rather than a conceptual breakthrough. The novelty is primarily engineering-focused.
+
+### 3. Significance (70/100)
+
+**Strengths:**
+- Addresses a practical problem (low-resource text classification with 500 labels)
+- Improvements are consistent across all four datasets
+- Gains are largest when data are scarcest (1.6 points at 100 labels), which is practically important
+- Simple to implement and adds no inference cost
+- Results on standard benchmarks (SST-2, AG News, TREC, SUBJ)
+
+**Weaknesses:**
+- Absolute improvements are modest (1.1 points over CERT; 3.8 over fine-tuning)
+- Limited to low-resource regime (500 labels); unclear if insights transfer to other settings
+- Only tested on four English text classification datasets with short texts
+- Does not explore larger models (BERT-large, RoBERTa, etc.) or modern architectures (LLMs)
+- The practical impact of 1-1.6 point improvements on some tasks may be marginal
+- No comparison with recent contrastive methods or other curriculum-based approaches beyond reversed curriculum
+
+**Assessment:** The work is solid and practically useful for the specific low-resource setting, but the scope is narrow and improvements are modest.
+
+### 4. Clarity (80/100)
+
+**Strengths:**
+- Well-written and easy to follow
+- Clear presentation of method, experimental setup, and results
+- Good use of tables
+- Concise and appropriately scoped paper
+- Method description is precise
+
+**Weaknesses:**
+- Figure would help visualize the curriculum schedule (though the mathematical definition is clear)
+- Limited discussion of *why* reversed curriculum performs worse—misses opportunity to provide insight
+- The connection between augmentation strength and contrastive learning difficulty could be explained more thoroughly
+- No discussion of how to select curriculum length in practice (grid search on all configs is not practical)
+- Missing details on how multiple operators are sampled (stated "uniformly" but unclear if both views use same operator or different ones)
+
+**Minor issues:**
+- "c(t) = min(1, t / L)" notation is clear but could benefit from an illustrative example
+- The fixed mixture baseline (L=0) description could be clearer
+
+## Missing Elements
+
+1. **Statistical significance tests**: With improvements of 0.8-1.5 points and std devs of 0.6-1.1, significance testing would strengthen claims
+2. **Error analysis**: Which types of examples benefit most from curriculum scheduling?
+3. **Hyperparameter sensitivity**: How sensitive is CurCon to curriculum length and other hyperparameters?
+4. **Broader evaluation**: Only English, short texts, BERT-base—limited generalizability claims
+5. **Learned curricula**: The paper acknowledges this but doesn't explore it
+
+## Technical Concerns
+
+1. **Hyperparameter fairness**: CurCon gets 48 hyperparameter configurations tuned on validation data, while CERT uses published hyperparameters. This could introduce bias.
+2. **Curriculum length selection**: In practice, how would one select L without a labeled validation set? The paper sidesteps this.
+3. **Reproducibility**: Code availability not mentioned; some implementation details missing
+
+## Overall Assessment
+
+CurCon presents a simple, practical improvement to intermediate contrastive training for low-resource text classification. The method is well-motivated by curriculum learning theory and demonstrates consistent, albeit modest, empirical improvements. The paper is clearly written with proper experimental methodology, though it has a narrow scope and the improvements are incremental rather than transformative.
+
+The work makes a valid contribution to low-resource NLP but lacks novelty, theoretical depth, and broad validation. It reads more as a solid engineering contribution than a significant research advance.
+
+---
+
+## Final Scores
+
+| Criterion | Score |
+|-----------|-------|
+| Soundness | 75 |
+| Novelty | 65 |
+| Significance | 70 |
+| Clarity | 80 |
+| **Average** | **72.5** |
+
+---
+
+## Recommendation: **ACCEPT**
+
+**Justification:**
+
+While not groundbreaking, CurCon deserves acceptance because:
+
+1. **Solid execution**: Proper experimental methodology with ablations and analysis across multiple seeds
+2. **Practical value**: Consistent improvements on a real problem (low-resource classification)
+3. **Clear presentation**: Well-written and easy to understand
+4. **Reproducible approach**: Simple method that practitioners can easily adopt
+
+However, this is a **borderline accept**, not a strong accept:
+- Improvements are incremental (1.1 points) without significance testing
+- Limited novelty (straightforward combination of existing ideas)
+- Narrow scope (4 English datasets, BERT-base only)
+- Lacks deep insights into *why* the method works
+
+**Suitable for**: A venue focused on practical NLP or low-resource methods (e.g., industry-focused tracks or resource-constrained settings), but would be a weak paper for a top-tier venue emphasizing novelty and significance.

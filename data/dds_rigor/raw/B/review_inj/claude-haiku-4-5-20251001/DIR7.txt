@@ -1,0 +1,100 @@
+# Paper Review: CurCon
+
+## Detailed Assessment
+
+### Soundness: 78/100
+
+**Strengths:**
+- The core idea is theoretically motivated: curriculum learning principles are well-established, and applying them to augmentation strength in contrastive learning is reasonable
+- Experimental methodology is solid: stratified sampling, multiple random seeds (5), proper train/val/test splits, appropriate baselines
+- The ablation studies are comprehensive and provide meaningful insights (curriculum vs. fixed, reversed curriculum, operator removal)
+- Table 3 effectively demonstrates that gains diminish with more labels, supporting the low-resource claim
+
+**Weaknesses:**
+- **Hyperparameter fairness**: CurCon undergoes grid search over 48 configurations while baselines use published hyperparameters. This creates an uneven comparison. CERT and SimCSE should have been tuned on the same validation sets
+- **Limited statistical analysis**: No significance testing provided. Some improvements (e.g., 0.5 points with 1,000 labels) are within noise margins
+- **Mechanism unclear**: Why is a *linear* curriculum optimal? The paper doesn't justify this design choice or explore alternatives
+- **Schedule design**: The thresholds (0.25, 0.5, 0.75) appear arbitrary with no justification or sensitivity analysis
+- **Missing analysis**: No investigation of what the curriculum actually learns or how representations evolve during training
+
+### Novelty: 72/100
+
+**Strengths:**
+- The specific application of curriculum scheduling to intermediate contrastive training is novel
+- The linear schedule with discrete operator thresholds is a clean, implementable contribution
+- Differs meaningfully from prior work on curriculum learning in vision (which focuses on magnitude) and text (which focuses on example ordering)
+
+**Weaknesses:**
+- Incremental contribution: applies existing curriculum learning ideas to a specific setting (CERT pipeline)
+- The core operators are standard (EDA, back-translation)
+- Similar ideas have been explored in vision (progressive data augmentation); the novelty is primarily in the application domain
+- No exploration of learned or adaptive schedules, despite acknowledging this as a limitation
+
+### Significance: 68/100
+
+**Strengths:**
+- Addresses a practically important problem: low-resource text classification is genuinely challenging
+- Improvements are consistent across all four datasets (1.1 points over CERT)
+- Gains are largest when they matter most (1.6 points improvement with 100 labels)
+- Simple method with no inference overhead makes adoption feasible
+- Results reproducible with single A100 GPU
+
+**Weaknesses:**
+- **Scale limitations**: Only 4 datasets, all English, short-text classification tasks. Generalization to longer documents, other languages, or other tasks is unclear
+- **Scope constraints**: Limited to BERT-base; no evaluation on larger models (BERT-large, RoBERTa) or modern alternatives (smaller efficient models, decoder-only LLMs)
+- **Practical impact modest**: 1.1 points is meaningful but incremental. The method adds 12% training time for small gains
+- **Resource dependency**: Requires WordNet and MT system; not universally available for all languages
+- **Benchmark concern**: AG News and TREC are relatively simple; results on more challenging benchmarks would strengthen claims
+
+### Clarity: 85/100
+
+**Strengths:**
+- Paper is well-written and easy to follow
+- Method description is clear and reproducible (Section 3)
+- The curriculum schedule formula is explicitly stated
+- Figures and tables are informative with appropriate error bars
+- Limitations section is honest
+
+**Weaknesses:**
+- Figure would help visualize the curriculum schedule evolution
+- Missing details on how operators interact when multiple are available
+- No discussion of computational cost comparison with baselines beyond the 12% figure
+- Would benefit from example augmented sentences for each operator
+
+---
+
+## Summary
+
+CurCon presents a straightforward and sensible idea: gradually increase augmentation strength during contrastive intermediate training. The execution is competent, with proper experimental methodology and honest reporting. The paper makes a meaningful but incremental contribution—applying curriculum learning principles to an existing method (CERT) in a specific setting.
+
+**Key concerns:**
+1. Hyperparameter tuning fairness creates some doubt about the robustness of comparisons
+2. Design choices (linear schedule, thresholds) lack justification
+3. Evaluation is limited to simple, short-text English datasets with one encoder size
+4. Gains are modest and diminish quickly with more labels
+
+**Why Accept Despite Concerns:**
+- The work is sound and addresses a real problem
+- Results are consistent and reproducible
+- The method is simple and practical
+- Ablations demonstrate the curriculum contributes meaningfully (0.8 points)
+- The analysis of how benefits decrease with more labels is insightful
+- The paper is well-executed within its scope
+
+This is a solid workshop/venue paper that makes an incremental but valuable contribution. It's not groundbreaking, but it's a useful technique practitioners could adopt.
+
+---
+
+## Final Scores
+
+| Criterion | Score |
+|-----------|-------|
+| Soundness | 78 |
+| Novelty | 72 |
+| Significance | 68 |
+| Clarity | 85 |
+| **Average** | **75.75** |
+
+## **Recommendation: ACCEPT**
+
+This is a borderline accept (75.75/100). The paper presents a simple, well-motivated method with solid experimental validation on a practical problem. While incremental and limited in scope, the work is technically sound, reproducible, and would be a reasonable contribution to a venue focusing on NLP methods. The honest acknowledgment of limitations and proper ablation studies strengthen the work. For a top-tier venue (ACL, EMNLP), this would be a borderline reject; for a workshop or specialized venue on low-resource NLP, this is clearly acceptable.

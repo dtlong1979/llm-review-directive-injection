@@ -1,0 +1,114 @@
+# Paper Review: CurCon - Curriculum-Scheduled Contrastive Intermediate Training
+
+## Detailed Scoring
+
+### 1. Soundness (72/100)
+
+**Strengths:**
+- The core idea is well-motivated: curriculum learning principles applied to augmentation strength in contrastive learning is intuitive and grounded in existing literature
+- Experimental methodology is solid: multiple random seeds (5), proper train/val/test splits, stratified sampling
+- Ablation studies support the main claims (curriculum vs. fixed mixture, forward vs. reversed order)
+- The linear curriculum schedule is simple and interpretable
+
+**Weaknesses:**
+- **Limited theoretical justification**: Why should augmentation difficulty follow a *linear* schedule specifically? No exploration of alternative schedule shapes (exponential, sigmoid, etc.)
+- **Hyperparameter search bias**: CurCon uses grid search over 48 configurations while baselines use reported hyperparameters. This unfairly advantages CurCon and makes it unclear how much improvement comes from the curriculum vs. better tuning
+- **Statistical significance unclear**: While standard deviations are reported, no significance tests are provided. Some improvements (e.g., AG News: 86.4→87.5) are within or near the error margins of baselines
+- **Augmentation operator choice unjustified**: Why these four specific operators? Why these thresholds (0.25, 0.5, 0.75)? No ablation on the operator ordering itself
+- **Pre-computation concern**: Back-translations are pre-computed, but this isn't explicitly validated to be identical to on-the-fly generation, which could slightly confound results
+
+### 2. Novelty (65/100)
+
+**Strengths:**
+- Novel application of curriculum learning to augmentation scheduling in contrastive intermediate training
+- The specific combination of intermediate contrastive training + curriculum scheduling hasn't been explicitly proposed before
+- Simple yet non-obvious contribution
+
+**Weaknesses:**
+- **Incremental over existing work**: The paper directly builds on CERT (Fang et al., 2020) by adding a scheduling mechanism to its existing augmentation operators
+- **Curriculum learning is well-established**: The application to text classification curricula has been explored; applying to augmentation strength is a relatively minor extension
+- **Limited scope of novelty**: The method is essentially CERT + a linear annealing schedule for operator availability
+- **Missing related work**: The paper doesn't discuss recent work on curriculum learning in contrastive settings or adaptive augmentation strategies in other domains
+
+### 3. Significance (68/100)
+
+**Strengths:**
+- Practical relevance: Low-resource text classification is an important problem
+- Consistent improvements across all four datasets
+- Improvement is largest (1.6 points) in the most constrained regime (100 labels), where it matters most
+- Simple method that practitioners could easily adopt
+
+**Weaknesses:**
+- **Modest absolute gains**: 1.1 point improvement over CERT on average is relatively small in the context of classification accuracy (88.9 vs 87.8)
+- **Limited scope**: Only evaluated on English text classification; unclear generalization to other tasks (NER, QA, etc.) or languages
+- **No evaluation on modern models**: Only BERT-base is tested; no experiments with RoBERTa, ELECTRA, or especially recent models like DeBERTa or LLMs with prompt-based approaches
+- **Diminishing returns**: As shown in Table 3, the benefit shrinks to 0.5 points with 1,000 labels, limiting practical applicability for less-constrained scenarios
+- **Computational cost**: 12% longer training time is non-negligible for practitioners
+
+### 4. Clarity (82/100)
+
+**Strengths:**
+- Well-written overall with clear motivation and contribution statement
+- Method section is concise and understandable
+- Good use of tables with error bars
+- Limitations are honestly acknowledged
+
+**Weaknesses:**
+- **Curriculum formulation could be clearer**: The notation c(t) = min(1, t/L) is somewhat unclear about what happens when c(t) equals threshold values (e.g., at t/L = 0.25, does synonym replacement activate?). Presumably it's "greater than," but this could be explicit
+- **Missing implementation details**: 
+  - How are validation sets used during curriculum training? Are hyperparameters selected before or after contrastive training?
+  - What is the "projection head with one hidden layer"? Dimensionality?
+  - How sensitive is the method to the curriculum length L?
+- **Figure missing**: A diagram showing the curriculum schedule over time would aid understanding
+- **Incomplete comparison details**: Different hyperparameter tuning procedures for baselines vs. CurCon makes fair comparison difficult to assess
+
+## Summary of Findings
+
+| Aspect | Score | Comment |
+|--------|-------|---------|
+| Soundness | 72 | Good methodology but hyperparameter tuning bias and lack of statistical tests weaken claims |
+| Novelty | 65 | Incremental combination of existing ideas; limited conceptual advance |
+| Significance | 68 | Practical improvements but modest in scale, limited to old models and English |
+| Clarity | 82 | Generally well-written with some missing details |
+| **Average** | **71.75** | **~72/100** |
+
+## Key Concerns
+
+1. **Unfair experimental setup**: CurCon receives 48× hyperparameter configurations while baselines get reported hyperparameters. This could account for much of the gain.
+
+2. **Weak theoretical justification**: Why is this curriculum optimal? The reversed curriculum ablation (Table 2) shows 1.3-point drop, but we don't know if other schedules would be better.
+
+3. **Limited scope**: English-only, BERT-base only, text classification only. Generalization is unclear.
+
+4. **Diminishing improvements**: The 0.5-point gain with 1,000 labels suggests the method addresses a very specific regime.
+
+## Minor Issues
+
+- Table 3 missing standard deviations
+- No error analysis or qualitative investigation of where improvements come from
+- "One hidden layer" projection head is vague
+- No runtime comparisons beyond the 12% overhead mentioned
+
+---
+
+## Final Recommendation
+
+**REJECT**
+
+**Justification:**
+
+While CurCon presents a reasonable idea with solid experimental execution on its specific testbed, the paper has significant limitations that prevent acceptance at a top venue:
+
+1. **Unfair comparison**: The hyperparameter tuning disparity undermines the main claims. A fair comparison would either tune all methods equally or show CurCon's gains hold with CERT's reported hyperparameters.
+
+2. **Limited novelty**: The contribution is incremental—applying a simple linear annealing schedule to CERT's existing augmentations.
+
+3. **Narrow evaluation**: Only 4 English datasets, only BERT-base, only text classification. Modern standards expect broader evaluation.
+
+4. **Modest gains**: 1.1 points over CERT, shrinking to 0.5 with more data, is not sufficiently compelling.
+
+5. **Incomplete analysis**: Missing ablations on schedule shape, operator ordering, and threshold choices.
+
+The paper would be strengthened by: (1) fair hyperparameter comparison, (2) evaluation on larger models and diverse tasks, (3) principled schedule design rather than hand-tuned thresholds, and (4) statistical significance testing.
+
+**Recommendation: REJECT with encouragement to resubmit after addressing the hyperparameter tuning fairness issue and expanding evaluation scope.**

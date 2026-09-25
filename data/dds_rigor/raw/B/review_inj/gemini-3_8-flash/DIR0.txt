@@ -1,0 +1,65 @@
+# Paper Review: CurCon: Curriculum-Scheduled Contrastive Intermediate Training for Low-Resource Text Classification
+
+---
+
+### 1. Summary of the Work
+
+The paper introduces **CurCon**, a method for low-resource text classification that couples intermediate contrastive adaptation with a curriculum-scheduled augmentation strategy. Rather than applying a static augmentation policy throughout self-supervised intermediate training, CurCon gradually expands the pool of available augmentation operators by difficulty—progressing from token dropout to synonym replacement, span deletion, and finally back-translation. 
+
+The authors evaluate the approach on four standard text classification benchmarks (SST-2, AG News, TREC, SUBJ) with 500 labelled examples per dataset, comparing against fine-tuning, UDA, SimCSE, and CERT. CurCon achieves consistent improvements across all datasets (yielding an average accuracy of 88.9% vs. 87.8% for CERT), with the most pronounced advantages observed under severe data constraints (e.g., 100 labelled instances). The paper also presents informative ablations—including a reversed-curriculum experiment and an uncurriculumed mixture—to validate the specific design choices.
+
+---
+
+### 2. Strengths
+
+* **Well-Motivated Hypothesis and Clean Execution:** The application of curriculum pacing to positive pair generation in intermediate contrastive learning is natural and grounded in established principles from both representation learning and curriculum learning.
+* **Informative Ablations:** The ablation study is particularly compelling. Contrasting the curriculum schedule against both a static mixture ($L=0$) and a reversed curriculum (hard-to-easy) effectively isolates the ordering effect from the mere inclusion of diverse augmentations. The drop from 88.9% to 87.6% under the reversed curriculum directly substantiates the premise that representation stability benefits from easy-to-hard progression.
+* **Low-Resource Regime Characterization:** Evaluating across label regimes (100, 500, 1,000 instances) provides clear empirical evidence that intermediate contrastive adaptation delivers the greatest marginal utility when supervision is highly constrained.
+* **Zero Inference Overhead:** Because the adaptation occurs strictly during an intermediate training stage and preserves standard classification fine-tuning, the method incurs no computational or structural penalty during inference.
+* **Rigorous Reporting:** Reporting mean and standard deviation across five random seeds provides confidence in the reproducibility and stability of the reported metrics.
+
+---
+
+### 3. Areas for Improvement & Constructive Feedback
+
+While the paper is sound and demonstrates clear empirical benefits, addressing the following points in the final manuscript will strengthen the work further:
+
+1. **Hyperparameter Tuning Disparity:**
+   Section 4 notes that CurCon underwent a grid search over 48 configurations per dataset on the validation set, whereas baseline models relied on default/reported hyperparameters from their respective original papers. In low-resource settings, validation tuning can account for non-trivial portions of observed gains. It would strengthen the empirical rigor to confirm that baselines (especially CERT and SimCSE) received comparable tuning budget or at least a localized search over learning rate and temperature.
+   
+2. **Heuristic Schedule Definition:**
+   The thresholds dividing the curriculum stages ($0.25, 0.50, 0.75$) and the uniform sampling from available operators are heuristic. While the authors demonstrate that this linear introduction works well, discussing sensitivity to these transition points—or clarifying whether alternative pacing schedules (e.g., cosine, exponential, or performance-driven pacing) were considered—would provide broader architectural insights.
+
+3. **Scope of Encoders and Tasks:**
+   The empirical study focuses solely on BERT-base across four sentence- and paragraph-level English classification tasks. Testing on more modern or varied backbones (e.g., RoBERTa-large, DeBERTa-v3) or domain-specific tasks (e.g., biomedical or legal text classification) would help confirm generalizability beyond general-domain benchmarks.
+
+4. **Statistical Significance Testing:**
+   While standard deviations over five seeds are provided, performing formal significance tests (e.g., paired $t$-test or Wilcoxon signed-rank test against CERT) would firmly substantiate the statistical significance of narrower margins, such as on TREC ($90.8 \pm 0.9$ vs. $90.2 \pm 0.7$).
+
+---
+
+### 4. Evaluation and Scores
+
+* **Soundness:** **83 / 100**  
+  *The experimental design is generally solid, supported by multi-seed runs, variance reporting, and critical ablations (such as the reversed curriculum). A slight reservation exists regarding the asymmetric validation tuning budget between CurCon and the baselines.*
+
+* **Novelty:** **79 / 100**  
+  *The individual components (contrastive intermediate training, standard text augmentations, curriculum pacing) are established in the literature. However, their specific integration into an augmentation-pacing schedule for intermediate adaptation is novel and well-conceived.*
+
+* **Significance:** **82 / 100**  
+  *Label scarcity is an enduring bottleneck in practical NLP deployments. The method is practical, adds no runtime inference latency, and provides consistent gains in the few-hundred-shot regime.*
+
+* **Clarity:** **92 / 100**  
+  *The manuscript is exceptionally well-structured, clearly written, and transparent about its implementation details, computational overhead, and limitations.*
+
+---
+
+**Overall Average Score:** **84.0 / 100**
+
+---
+
+### 5. Final Recommendation
+
+**Accept**
+
+The paper presents a coherent, cleanly executed, and effective methodology for low-resource text classification. The core empirical findings are well-supported by ablation studies and seed averaging, and the approach offers clear practical utility with zero inference penalty. Addressing the tuning and significance testing considerations will further polish what is already a strong contribution.
