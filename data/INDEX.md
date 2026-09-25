@@ -21,3 +21,7 @@ Each folder holds the model outputs behind one part of the paper.
 
 Within each folder, `reviews/<model>/review_<input>` is the raw output for one call,
 `key.csv` gives each input's condition, and `results.csv` aggregates the decisions.
+
+## DDS detector validation
+
+`data/dds_validate/<detector>_<variant>/` holds the raw detector outputs for the DDS validation in Section 5: recall on held-out directive paraphrases, false positives on benign reviewer-directed sentences, and adaptive evasion. `code/dds_validate.py` regenerates them (naive vs precise detection criterion).
